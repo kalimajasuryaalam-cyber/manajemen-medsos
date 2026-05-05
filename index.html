@@ -656,7 +656,7 @@
 
                             <div class="flex flex-col sm:flex-row justify-end gap-4">
                                 <button class="px-8 py-4 rounded-2xl font-black text-slate-500 bg-slate-100 hover:bg-slate-200 hover:text-slate-700 transition-colors text-lg w-full sm:w-auto">Batal Aja</button>
-                                <button onclick="showToast('Asyik, Pengaturan sukses disimpan! 💾')" class="px-8 py-4 rounded-2xl font-black text-white bg-emerald-400 border-b-4 border-emerald-600 hover:bg-emerald-500 active:border-b-0 active:translate-y-1 transition-all text-lg w-full sm:w-auto shadow-lg shadow-emerald-200">Simpan Perubahan!</button>
+                                <button onclick="saveSettings()" class="px-8 py-4 rounded-2xl font-black text-white bg-emerald-400 border-b-4 border-emerald-600 hover:bg-emerald-500 active:border-b-0 active:translate-y-1 transition-all text-lg w-full sm:w-auto shadow-lg shadow-emerald-200">Simpan Perubahan!</button>
                             </div>
                         </div>
                     </div>
@@ -1482,6 +1482,29 @@
                 modalContainer.classList.add('hidden');
                 modalContainer.classList.remove('flex');
             }, 300);
+        }
+
+        window.saveSettings = function() {
+            const newName = document.getElementById('setting-input-name').value;
+            const newEmail = document.getElementById('setting-input-email').value;
+
+            if(!newName.trim() || !newEmail.trim()) {
+                showToast('❌ Nama dan Email gak boleh kosong ya!');
+                return;
+            }
+
+            // Update tampilan teks di Pengaturan
+            document.getElementById('setting-name').innerText = newName;
+            
+            // Update tampilan teks di Sidebar
+            document.getElementById('sidebar-user-name').innerText = newName;
+            document.getElementById('sidebar-user-email').innerText = newEmail;
+            
+            // Update teks sambutan di Dasbor menggunakan nama depan
+            const namaPanggilan = newName.split(' ')[0];
+            document.getElementById('welcome-text').innerText = `Halo ${namaPanggilan}!`;
+
+            showToast('Asyik, Pengaturan sukses disimpan! 💾');
         }
 
         function openMobileMenu() {
