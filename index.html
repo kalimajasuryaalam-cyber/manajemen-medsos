@@ -93,7 +93,7 @@
 <body class="bg-[#fff9f0] font-sans overflow-hidden text-slate-700 h-screen w-screen relative">
 
     <!-- AUTENTIKASI WRAPPER (LOGIN & DAFTAR) -->
-    <div id="auth-container" class="absolute inset-0 z-[100] flex items-center justify-center p-6 bg-[#fff9f0] bg-[radial-gradient(#fce7f3_2px,transparent_2px)] [background-size:32px_32px] transition-opacity duration-500">
+    <div id="auth-container" class="absolute inset-0 z-[100] flex items-center justify-center p-6 bg-[#fff9f0] bg-[radial-gradient(#fce7f3_2px,transparent_2px)] [background-size:32px_32px] transition-opacity duration-500 hidden opacity-0">
         <div class="absolute top-10 left-10 text-6xl float-slow opacity-60">🎈</div>
         <div class="absolute bottom-20 right-20 text-7xl float-fast opacity-60">✨</div>
         <div class="absolute top-32 right-32 text-5xl float-slow opacity-60">🚀</div>
@@ -220,7 +220,7 @@
             </nav>
 
             <div class="p-6">
-                <!-- Profil Pengguna Tersimpan Permanen -->
+                <!-- Profil Pengguna -->
                 <div class="bg-gradient-to-b from-sky-100 to-indigo-100 rounded-[2rem] p-6 border-4 border-white shadow-xl shadow-sky-100/50 text-center relative overflow-hidden group">
                     <div class="absolute -top-6 -right-6 text-7xl opacity-20 group-hover:rotate-12 transition-transform duration-500">🎈</div>
                     <img id="sidebar-user-avatar" src="" alt="User" class="w-16 h-16 rounded-full border-4 border-white mx-auto mb-3 shadow-md group-hover:-translate-y-2 transition-transform object-cover">
@@ -238,7 +238,7 @@
         <!-- MOBILE OVERLAY -->
         <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 hidden md:hidden transition-opacity"></div>
 
-        <!-- MODAL CONNECT ACCOUNT (VERIFIKASI & PERSISTENSI) -->
+        <!-- MODAL CONNECT ACCOUNT (VERIFIKASI) -->
         <div id="connect-modal-container" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-0">
             <div id="modal-backdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-md"></div>
             <div id="connect-modal" class="relative bg-white border-4 border-slate-100 rounded-[3rem] p-8 sm:p-10 max-w-md w-full shadow-2xl z-10 flex flex-col items-center text-center">
@@ -704,7 +704,9 @@
         const svgLI = '<svg viewBox="0 0 24 24" class="w-full h-full"><rect width="24" height="24" rx="4" fill="#0A66C2"/><path fill="#FFF" d="M7.1 20.5H3.6V9H7.1v11.5zM5.3 7.4c-1.1 0-2.1-.9-2.1-2.1 0-1.1.9-2.1 2.1-2.1 1.1 0 2.1.9 2.1 2.1 0 1.1-.9 2.1-2.1 2.1zm15.1 13.1h-3.6v-5.6c0-1.3 0-3-1.9-3-1.9 0-2.1 1.4-2.1 2.9v5.7H9.3V9h3.4v1.6h.1c.5-.9 1.6-1.9 3.4-1.9 3.6 0 4.3 2.4 4.3 5.5v6.3z"/></svg>';
 
         // --- MANAJEMEN PENYIMPANAN PERMANEN (LOCAL STORAGE) ---
-        // 1. Data Profil
+        let savedAuthState = localStorage.getItem('medsos_auth_state'); 
+        let savedView = localStorage.getItem('medsos_current_view') || 'view-dashboard';
+
         let userProfiles = JSON.parse(localStorage.getItem('medsos_user_profiles')) || {
             'admin': { name: 'Admin Ceria', email: 'admin@yay.id', role: 'Bos Besar 👑', avatar: '' },
             'anggota': { name: 'Tim Hore', email: 'tim@yay.id', role: 'Tukang Balas Komen 💬', avatar: '' }
@@ -714,7 +716,6 @@
             localStorage.setItem('medsos_user_profiles', JSON.stringify(userProfiles));
         }
 
-        // 2. Data Platform Dasar
         const platformsData = {
             'tt': { id: 'tt', name: 'TikTok', logo: svgTikTok, bg: 'bg-white', colorBorder: 'border-slate-800', accounts: [] },
             'ig': { id: 'ig', name: 'Instagram', logo: svgIG, bg: 'bg-white', colorBorder: 'border-pink-300', accounts: [] },
@@ -725,14 +726,12 @@
             'li': { id: 'li', name: 'LinkedIn', logo: svgLI, bg: 'bg-white', colorBorder: 'border-indigo-300', accounts: [] },
         };
 
-        // 3. Status Koneksi Akun Tersimpan
         let savedAccountsState = JSON.parse(localStorage.getItem('medsos_accounts_state'));
         if (savedAccountsState) {
             Object.keys(savedAccountsState).forEach(id => {
                 if (platformsData[id]) platformsData[id].accounts = savedAccountsState[id];
             });
         } else {
-            // Default awal jika kosong
             platformsData['tt'].accounts = [{ id: 'tt_1', handle: '@perusahaan_tiktok' }];
             platformsData['ig'].accounts = [{ id: 'ig_1', handle: '@perusahaan.kita' }];
             platformsData['tw'].accounts = [{ id: 'tw_1', handle: '@perusahaanKita' }];
@@ -776,6 +775,27 @@
             populateEmojis();
             lucide.createIcons();
             setupEventListeners();
+
+            // CEK STATUS LOGIN PERMANEN
+            if (savedAuthState) {
+                userRoleLogin = savedAuthState;
+                applyProfileToUI(userRoleLogin);
+                
+                // Langsung masuk app tanpa lewat loading screen jika di-refresh
+                document.getElementById('auth-container').classList.add('hidden');
+                document.getElementById('auth-container').style.opacity = '0';
+                
+                const appLayout = document.getElementById('app-layout');
+                appLayout.classList.remove('hidden');
+                appLayout.style.opacity = '1';
+                
+                // Tetap di tab / menu yang terakhir dibuka
+                switchView(savedView);
+            } else {
+                // Tampilkan Pintu Masuk
+                document.getElementById('auth-container').classList.remove('hidden');
+                document.getElementById('auth-container').style.opacity = '1';
+            }
         });
 
         // --- LOGIK MISI ---
@@ -840,7 +860,7 @@
             lucide.createIcons();
         }
 
-        // --- SISTEM LOGIN & DAFTAR (DENGAN PERSISTENSI) ---
+        // --- SISTEM LOGIN & DAFTAR ---
         window.switchAuthView = function(view) {
             const viewLogin = document.getElementById('view-login');
             const viewRegister = document.getElementById('view-register');
@@ -921,10 +941,9 @@
                 const registeredName = document.getElementById('reg-name').value;
                 const registeredEmail = document.getElementById('reg-email').value;
                 
-                // Simpan permanen data pendaftaran
                 userProfiles[userRoleRegister].name = registeredName;
                 userProfiles[userRoleRegister].email = registeredEmail;
-                userProfiles[userRoleRegister].avatar = ''; // Reset custom avatar
+                userProfiles[userRoleRegister].avatar = '';
                 saveUserProfiles();
 
                 document.getElementById('login-username').value = registeredName;
@@ -937,6 +956,30 @@
             }, 1200);
         }
 
+        function applyProfileToUI(role) {
+            const profile = userProfiles[role];
+            const avatarName = profile.name.replace(/\s+/g, '+');
+            const defaultAvatarUrl = `https://ui-avatars.com/api/?name=${avatarName}&background=${role === 'admin' ? 'f43f5e' : '0ea5e9'}&color=fff&rounded=true`;
+            const finalAvatar = profile.avatar || defaultAvatarUrl;
+
+            document.getElementById('sidebar-user-name').innerText = profile.name;
+            document.getElementById('sidebar-user-email').innerText = profile.email;
+            document.getElementById('sidebar-user-avatar').src = finalAvatar;
+            
+            document.getElementById('setting-name').innerText = profile.name;
+            document.getElementById('setting-role').innerHTML = profile.role;
+            document.getElementById('setting-role').className = role === 'admin' 
+                ? "text-rose-500 font-extrabold text-xl bg-rose-50 px-4 py-1.5 rounded-full inline-block" 
+                : "text-sky-500 font-extrabold text-xl bg-sky-50 px-4 py-1.5 rounded-full inline-block";
+            
+            document.getElementById('setting-avatar').src = finalAvatar + (profile.avatar ? '' : '&size=128');
+            document.getElementById('setting-input-name').value = profile.name;
+            document.getElementById('setting-input-email').value = profile.email;
+
+            const namaPanggilan = profile.name.split(' ')[0];
+            document.getElementById('welcome-text').innerText = `Halo ${namaPanggilan}!`;
+        }
+
         window.handleLogin = function(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-login');
@@ -945,29 +988,13 @@
             lucide.createIcons();
 
             setTimeout(() => {
-                // Gunakan Data Profil Yang Tersimpan di Local Storage
-                const profile = userProfiles[userRoleLogin];
-                const avatarName = profile.name.replace(/\s+/g, '+');
-                const defaultAvatarUrl = `https://ui-avatars.com/api/?name=${avatarName}&background=${userRoleLogin === 'admin' ? 'f43f5e' : '0ea5e9'}&color=fff&rounded=true`;
-                
-                const finalAvatar = profile.avatar || defaultAvatarUrl;
+                applyProfileToUI(userRoleLogin);
 
-                document.getElementById('sidebar-user-name').innerText = profile.name;
-                document.getElementById('sidebar-user-email').innerText = profile.email;
-                document.getElementById('sidebar-user-avatar').src = finalAvatar;
-                
-                document.getElementById('setting-name').innerText = profile.name;
-                document.getElementById('setting-role').innerHTML = profile.role;
-                document.getElementById('setting-role').className = userRoleLogin === 'admin' 
-                    ? "text-rose-500 font-extrabold text-xl bg-rose-50 px-4 py-1.5 rounded-full inline-block" 
-                    : "text-sky-500 font-extrabold text-xl bg-sky-50 px-4 py-1.5 rounded-full inline-block";
-                
-                document.getElementById('setting-avatar').src = finalAvatar + (profile.avatar ? '' : '&size=128');
-                document.getElementById('setting-input-name').value = profile.name;
-                document.getElementById('setting-input-email').value = profile.email;
-
-                const namaPanggilan = profile.name.split(' ')[0];
-                document.getElementById('welcome-text').innerText = `Halo ${namaPanggilan}!`;
+                // Simpan Sesi Login
+                localStorage.setItem('medsos_auth_state', userRoleLogin);
+                if (!localStorage.getItem('medsos_current_view')) {
+                    localStorage.setItem('medsos_current_view', 'view-dashboard');
+                }
 
                 const authContainer = document.getElementById('auth-container');
                 const appLayout = document.getElementById('app-layout');
@@ -981,6 +1008,9 @@
                         appLayout.style.opacity = '1';
                         btn.innerHTML = `<i data-lucide="door-open" class="w-6 h-6"></i> Yuk Masuk!`;
                         btn.classList.remove('opacity-80', 'cursor-wait', 'scale-95');
+                        
+                        switchView(localStorage.getItem('medsos_current_view'));
+                        const namaPanggilan = userProfiles[userRoleLogin].name.split(' ')[0];
                         showToast(`Yeay! Selamat datang kembali, ${namaPanggilan}! 🎉`);
                     }, 50);
                 }, 500);
@@ -988,6 +1018,10 @@
         }
 
         window.keluarAplikasi = function() {
+            // HAPUS SESI DARI MEMORI
+            localStorage.removeItem('medsos_auth_state');
+            localStorage.removeItem('medsos_current_view');
+
             const authContainer = document.getElementById('auth-container');
             const appLayout = document.getElementById('app-layout');
 
@@ -997,16 +1031,11 @@
                 authContainer.classList.remove('hidden');
                 setTimeout(() => {
                     authContainer.style.opacity = '1';
-                    document.getElementById('login-username').value = '';
                     document.getElementById('login-password').value = '';
-                    document.getElementById('reg-name').value = '';
-                    document.getElementById('reg-email').value = '';
-                    document.getElementById('reg-password').value = '';
 
                     selectRole('anggota', 'login');
                     selectRole('anggota', 'register');
 
-                    switchView('view-dashboard'); 
                     switchAuthView('login'); 
                 }, 50);
             }, 500);
@@ -1203,6 +1232,9 @@
 
         // --- INTERACTIVITY LOGIC ---
         function switchView(targetId) {
+            // SIMPAN TAB TERAKHIR DI BROWSER
+            localStorage.setItem('medsos_current_view', targetId);
+
             const navButtons = document.querySelectorAll('.nav-btn');
             const views = document.querySelectorAll('.view-section');
 
@@ -1276,7 +1308,7 @@
                     reader.onload = function(ev) {
                         const newUrl = ev.target.result;
                         userProfiles[userRoleLogin].avatar = newUrl;
-                        saveUserProfiles(); // SIMPAN PERMANEN
+                        saveUserProfiles(); 
                         
                         document.getElementById('setting-avatar').src = newUrl;
                         document.getElementById('sidebar-user-avatar').src = newUrl;
@@ -1284,7 +1316,7 @@
                     }
                     reader.readAsDataURL(file);
                 }
-                this.value = ''; // Reset input
+                this.value = '';
             });
 
             document.getElementById('btn-submit-post').addEventListener('click', handlePostSubmit);
@@ -1299,7 +1331,6 @@
                 return;
             }
 
-            // SIMPAN PERMANEN KE LOCAL STORAGE
             userProfiles[userRoleLogin].name = newName;
             userProfiles[userRoleLogin].email = newEmail;
             saveUserProfiles();
@@ -1314,7 +1345,7 @@
             showToast('Mantap, Pengaturan berhasil disimpan permanen! 💾');
         }
 
-        // --- MODAL SAMBUNG & PUTUS LOGIC DENGAN VERIFIKASI & PERSISTENSI ---
+        // --- MODAL SAMBUNG & PUTUS LOGIC ---
         function openModal(platformId) {
             const p = platformsData[platformId];
             if(!p || p.accounts.length >= 3) return;
@@ -1459,7 +1490,7 @@
                     selectedPlatformsForPost.push(newAccountId);
                 }
 
-                saveAccountsState(); // SIMPAN PERMANEN KONEKSI SOSMED
+                saveAccountsState(); 
 
                 btn.innerHTML = `<i data-lucide="plug-zap" class="w-6 h-6"></i> Gas Sambungin!`;
                 btn.classList.remove('opacity-70', 'cursor-wait');
@@ -1495,7 +1526,7 @@
                     selectedPlatformsForPost = selectedPlatformsForPost.filter(id => id !== accountId);
                 }
                 
-                saveAccountsState(); // HAPUS KONEKSI PERMANEN
+                saveAccountsState(); 
 
                 showToast(`Yah, akun ${handleName} udah diputusin 💔`);
                 
@@ -1505,7 +1536,6 @@
             }, 1000);
         }
 
-        // --- DETAIL STATISTIK MODAL LOGIC ---
         const detailMockData = {
             'teman': {
                 title: 'Teman Baru 🎉',
