@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medsos Center Dashboard</title>
     
-    <!-- Google Fonts: Nunito (Bulat, Ramah, dan Ceria) -->
+    <!-- Google Fonts: Nunito -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
@@ -28,13 +28,11 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
-        /* Custom Scrollbar Ceria */
         ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #fca5a5; border-radius: 20px; border: 2px solid #fff9f0; }
         ::-webkit-scrollbar-thumb:hover { background: #f87171; }
         
-        /* Animasi Bouncy (Memantul) */
         .toast-enter { animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
         .toast-exit { animation: bounceOut 0.4s ease-in forwards; }
         
@@ -61,7 +59,6 @@
             to { transform: scale(0.8); opacity: 0; }
         }
 
-        /* Bouncy Hover Effect untuk Kartu */
         .hover-bounce {
             transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), box-shadow 0.3s ease;
         }
@@ -70,17 +67,14 @@
             box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.08), 0 15px 15px -5px rgba(0, 0, 0, 0.04);
         }
 
-        /* Glass yang Ceria */
         .glass-ceria {
             background: rgba(255, 249, 240, 0.85);
             backdrop-filter: blur(12px);
-            border-bottom: 4px dashed #fce7f3; /* Garis putus-putus lucu */
+            border-bottom: 4px dashed #fce7f3;
         }
         
-        /* Buat icon sedikit lebih tebal secara global */
         .lucide { stroke-width: 2.5; }
 
-        /* Floating Animation untuk Login Background */
         .float-slow { animation: float 6s ease-in-out infinite; }
         .float-fast { animation: float 4s ease-in-out infinite reverse; }
         @keyframes float {
@@ -89,22 +83,23 @@
             100% { transform: translateY(0px) rotate(0deg); }
         }
 
-        /* Fade transition helpers */
         .fade-hide { opacity: 0; pointer-events: none; z-index: -1; transition: opacity 0.4s ease; position: absolute; }
         .fade-show { opacity: 1; pointer-events: auto; z-index: 100; transition: opacity 0.4s ease; position: absolute; inset: 0; }
+        
+        /* Transition untuk pemilihan akun */
+        .grayscale-icon { filter: grayscale(100%); opacity: 0.5; transition: all 0.3s ease; }
+        .color-icon { filter: grayscale(0%); opacity: 1; transition: all 0.3s ease; }
     </style>
 </head>
 <body class="bg-[#fff9f0] font-sans overflow-hidden text-slate-700 h-screen w-screen relative">
 
     <!-- AUTENTIKASI WRAPPER (LOGIN & DAFTAR) -->
     <div id="auth-container" class="absolute inset-0 z-[100] flex items-center justify-center p-6 bg-[#fff9f0] bg-[radial-gradient(#fce7f3_2px,transparent_2px)] [background-size:32px_32px] transition-opacity duration-500">
-        <!-- Ornamen Latar Belakang -->
         <div class="absolute top-10 left-10 text-6xl float-slow opacity-60">🎈</div>
         <div class="absolute bottom-20 right-20 text-7xl float-fast opacity-60">✨</div>
         <div class="absolute top-32 right-32 text-5xl float-slow opacity-60">🚀</div>
         <div class="absolute bottom-10 left-32 text-6xl float-fast opacity-60">🎉</div>
 
-        <!-- NOTIFIKASI TOAST LOGIN/REGISTER -->
         <div id="auth-toast" class="fixed top-10 bg-white border-4 border-emerald-300 text-slate-800 px-7 py-4 rounded-3xl shadow-xl shadow-emerald-500/20 flex items-center gap-4 z-[110] hidden">
             <div class="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center">
                 <i data-lucide="party-popper" class="w-7 h-7 text-emerald-500"></i>
@@ -124,12 +119,10 @@
             <div class="w-full space-y-5">
                 <div class="flex gap-4">
                     <div onclick="handleAdminClick('login')" id="login-role-admin" class="flex-1 p-4 rounded-3xl border-4 border-slate-100 bg-slate-50 text-slate-400 font-black text-center cursor-pointer hover-bounce shadow-sm hover:border-slate-200 transition-all">
-                        <div class="text-3xl mb-1">👑</div>
-                        Admin
+                        <div class="text-3xl mb-1">👑</div>Admin
                     </div>
                     <div onclick="selectRole('anggota', 'login')" id="login-role-anggota" class="flex-1 p-4 rounded-3xl border-4 border-sky-300 bg-sky-50 text-sky-600 font-black text-center cursor-pointer hover-bounce shadow-sm transform scale-105 transition-all">
-                        <div class="text-3xl mb-1">🎒</div>
-                        Anggota
+                        <div class="text-3xl mb-1">🎒</div>Anggota
                     </div>
                 </div>
 
@@ -184,7 +177,7 @@
         </div>
     </div>
 
-    <!-- WRAPPER UTAMA APLIKASI (Sembunyi sebelum login) -->
+    <!-- WRAPPER UTAMA APLIKASI -->
     <div id="app-layout" class="flex h-screen w-full hidden opacity-0 transition-opacity duration-700">
         
         <!-- SIDEBAR -->
@@ -222,7 +215,6 @@
                     <i data-lucide="pie-chart" class="w-6 h-6"></i>
                     <span class="text-lg">Analitik 📊</span>
                 </button>
-                <!-- BARU: MENU TARGET & ARAHAN -->
                 <button data-target="view-targets" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 text-slate-500 hover:bg-pink-50 hover:text-pink-500 font-extrabold hover:scale-105 border-2 border-transparent hover:border-pink-200">
                     <i data-lucide="target" class="w-6 h-6"></i>
                     <span class="text-lg">Target & Arahan 🎯</span>
@@ -230,7 +222,6 @@
             </nav>
 
             <div class="p-6">
-                <!-- Profil Pengguna Berubah Sesuai Login -->
                 <div class="bg-gradient-to-b from-sky-100 to-indigo-100 rounded-[2rem] p-6 border-4 border-white shadow-xl shadow-sky-100/50 text-center relative overflow-hidden group">
                     <div class="absolute -top-6 -right-6 text-7xl opacity-20 group-hover:rotate-12 transition-transform duration-500">🎈</div>
                     <img id="sidebar-user-avatar" src="https://ui-avatars.com/api/?name=Admin+Ceria&background=f43f5e&color=fff&rounded=true" alt="User" class="w-16 h-16 rounded-full border-4 border-white mx-auto mb-3 shadow-md group-hover:-translate-y-2 transition-transform">
@@ -257,8 +248,8 @@
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
 
-                <div id="modal-icon-container" class="w-24 h-24 rounded-[2rem] flex items-center justify-center border-4 border-white shadow-xl mb-6 transform -rotate-6">
-                    <i id="modal-icon" data-lucide="link" class="w-12 h-12"></i>
+                <div class="w-24 h-24 rounded-[2rem] flex items-center justify-center bg-white border-4 border-slate-100 shadow-xl mb-6 transform -rotate-6 overflow-hidden">
+                    <div id="modal-icon" class="w-12 h-12 flex items-center justify-center"></div>
                 </div>
                 
                 <h2 class="text-3xl font-black text-slate-800 mb-2">Sambungin <span id="modal-platform-name">Akun</span></h2>
@@ -336,7 +327,6 @@
             <!-- MAIN SCROLLABLE AREA -->
             <main class="flex-1 overflow-x-hidden overflow-y-auto p-6 sm:p-8 lg:p-10 relative">
                 
-                <!-- TOAST NOTIFICATION MAIN APP -->
                 <div id="toast" class="fixed top-28 right-8 bg-white border-4 border-emerald-300 text-slate-800 px-7 py-4 rounded-3xl shadow-xl shadow-emerald-500/20 flex items-center gap-4 z-[70] hidden">
                     <div class="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center">
                         <i data-lucide="party-popper" class="w-7 h-7 text-emerald-500"></i>
@@ -353,7 +343,6 @@
                         <p class="text-slate-500 mt-2 text-xl font-extrabold">Semua kabar baik dari audiensmu kumpul di sini.</p>
                     </div>
 
-                    <!-- Stats Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         <div onclick="openDetailModal('teman')" class="cursor-pointer bg-gradient-to-br from-rose-100 to-pink-100 p-6 rounded-[2.5rem] border-4 border-white shadow-xl shadow-rose-100/50 hover-bounce flex flex-col justify-between h-52 relative overflow-hidden group">
                             <div class="absolute -right-6 -bottom-6 text-8xl opacity-30 transition-transform group-hover:scale-110 group-hover:rotate-12">💖</div>
@@ -404,7 +393,6 @@
                         </div>
                     </div>
 
-                    <!-- Connected Accounts Overview -->
                     <div class="bg-white rounded-[3rem] border-4 border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden">
                         <div class="px-8 py-6 border-b-4 border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#fdfbf7]">
                             <h2 class="text-2xl font-black text-slate-800">Saluran Aktif Kamu 🔌</h2>
@@ -459,18 +447,14 @@
                         <div class="p-8 relative">
                             <textarea id="post-textarea" placeholder="Hai dunia! Tebak apa yang baru hari ini? ✨" class="w-full h-56 p-6 bg-slate-50 border-4 border-slate-100 rounded-[2rem] focus:ring-0 focus:border-amber-300 focus:bg-[#fffdf5] transition-all resize-none outline-none text-slate-700 text-xl font-bold leading-relaxed"></textarea>
                             
-                            <div id="media-preview-container" class="mt-4 flex flex-wrap gap-4 hidden">
-                                <!-- Diisi lewat JS -->
-                            </div>
+                            <div id="media-preview-container" class="mt-4 flex flex-wrap gap-4 hidden"></div>
 
                             <div id="emoji-picker" class="absolute bottom-24 right-8 bg-white border-4 border-amber-100 rounded-3xl shadow-xl shadow-amber-100/50 p-5 hidden z-20 w-[320px]">
                                 <div class="flex justify-between items-center mb-3 border-b-4 border-slate-100 pb-3">
                                     <span class="font-black text-slate-700 text-base">Pilih Emoji Lucu</span>
                                     <button type="button" onclick="toggleEmojiPicker()" class="text-slate-400 hover:text-rose-500 bg-slate-100 hover:bg-rose-50 p-1.5 rounded-xl transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
                                 </div>
-                                <div class="grid grid-cols-5 gap-2 text-3xl max-h-48 overflow-y-auto custom-scrollbar" id="emoji-list">
-                                    <!-- Diisi lewat JS -->
-                                </div>
+                                <div class="grid grid-cols-5 gap-2 text-3xl max-h-48 overflow-y-auto custom-scrollbar" id="emoji-list"></div>
                             </div>
 
                             <div class="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4 relative">
@@ -516,9 +500,7 @@
                         </div>
                     </div>
 
-                    <div id="feed-container" class="space-y-6">
-                        <!-- Populated via JS -->
-                    </div>
+                    <div id="feed-container" class="space-y-6"></div>
                 </section>
 
                 <!-- VIEW: ANALYTICS -->
@@ -534,35 +516,29 @@
                                 <h3 class="font-black text-slate-800 text-2xl">Follower Baru</h3>
                                 <span class="px-4 py-2 bg-indigo-100 text-indigo-600 rounded-xl text-sm font-black border-2 border-indigo-200">Minggu Ini</span>
                             </div>
-                            <div class="h-64 flex items-end justify-between gap-3" id="bar-chart-container">
-                                <!-- Populated via JS -->
-                            </div>
+                            <div class="h-64 flex items-end justify-between gap-3" id="bar-chart-container"></div>
                         </div>
 
                         <div class="bg-white p-8 rounded-[3rem] border-4 border-orange-50 shadow-xl shadow-orange-100/50">
                             <h3 class="font-black text-slate-800 text-2xl mb-8">Sumber Keramaian</h3>
-                            <div class="space-y-7" id="source-breakdown-container">
-                                <!-- Populated via JS -->
-                            </div>
+                            <div class="space-y-7" id="source-breakdown-container"></div>
                         </div>
                     </div>
                 </section>
 
-                <!-- BARU: VIEW TARGET & ARAHAN (MISI) -->
+                <!-- VIEW TARGET & ARAHAN (MISI) -->
                 <section id="view-targets" class="view-section hidden space-y-10 max-w-5xl mx-auto">
                     <div>
                         <h1 class="text-4xl font-black text-slate-800 tracking-tight">Rapor & Misi Kita! 🎯</h1>
                         <p class="text-slate-500 mt-2 font-extrabold text-xl">Cek nilaimu dan lakuin misi ini biar akun makin ramai & viral!</p>
                     </div>
 
-                    <!-- Kartu Penilaian (Nilai Platform) -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <!-- Score 1 -->
                         <div class="bg-white rounded-[2.5rem] border-4 border-slate-100 shadow-xl shadow-slate-100/50 p-6 flex flex-col relative overflow-hidden group hover-bounce">
                             <div class="absolute -right-4 -bottom-4 text-7xl opacity-10 group-hover:rotate-12 transition-transform">📷</div>
                             <div class="flex justify-between items-start mb-4 relative">
                                 <div class="flex items-center gap-2">
-                                    <div class="p-2 bg-pink-100 text-pink-500 rounded-xl"><i data-lucide="instagram" class="w-5 h-5"></i></div>
+                                    <div class="p-2 w-10 h-10 flex items-center justify-center bg-white border-2 border-slate-100 shadow-sm rounded-xl" id="rapor-ig"></div>
                                     <span class="font-black text-slate-700 text-lg">Instagram</span>
                                 </div>
                                 <span class="text-4xl font-black text-emerald-500 drop-shadow-sm">A</span>
@@ -573,12 +549,11 @@
                             </div>
                         </div>
 
-                        <!-- Score 2 -->
                         <div class="bg-white rounded-[2.5rem] border-4 border-slate-100 shadow-xl shadow-slate-100/50 p-6 flex flex-col relative overflow-hidden group hover-bounce">
                             <div class="absolute -right-4 -bottom-4 text-7xl opacity-10 group-hover:rotate-12 transition-transform">🎵</div>
                             <div class="flex justify-between items-start mb-4 relative">
                                 <div class="flex items-center gap-2">
-                                    <div class="p-2 bg-slate-100 text-slate-800 rounded-xl"><i data-lucide="video" class="w-5 h-5"></i></div>
+                                    <div class="p-2 w-10 h-10 flex items-center justify-center bg-white border-2 border-slate-100 shadow-sm rounded-xl" id="rapor-tt"></div>
                                     <span class="font-black text-slate-700 text-lg">TikTok</span>
                                 </div>
                                 <span class="text-4xl font-black text-amber-500 drop-shadow-sm">B-</span>
@@ -589,7 +564,6 @@
                             </div>
                         </div>
 
-                        <!-- Score 3 -->
                         <div class="bg-gradient-to-br from-indigo-500 to-purple-500 rounded-[2.5rem] border-4 border-indigo-300 shadow-xl shadow-indigo-200 p-6 flex flex-col relative overflow-hidden group hover-bounce text-white">
                             <div class="absolute -right-4 -bottom-4 text-7xl opacity-20 group-hover:rotate-12 transition-transform">🏆</div>
                             <div class="flex justify-between items-start mb-4 relative">
@@ -603,7 +577,6 @@
                         </div>
                     </div>
 
-                    <!-- Misi Checkbox (Arahan) -->
                     <div class="bg-white rounded-[3rem] border-4 border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden p-8 sm:p-10">
                         <div class="flex items-center gap-4 border-b-4 border-rose-200 pb-4 mb-6">
                             <div class="bg-rose-100 p-3 rounded-2xl text-rose-500"><i data-lucide="list-todo" class="w-7 h-7"></i></div>
@@ -612,7 +585,6 @@
                         <p class="text-slate-500 font-bold mb-6">Klik kotaknya kalau misi udah kamu beresin ya. Biar makin semangat!</p>
                         
                         <div class="space-y-4" id="mission-list">
-                            <!-- Misi 1 -->
                             <div onclick="completeMission(this)" class="mission-item flex items-center justify-between p-5 rounded-2xl border-4 border-slate-100 bg-slate-50 cursor-pointer hover:border-emerald-200 hover:bg-emerald-50 transition-all duration-300 group">
                                 <div class="flex items-center gap-4">
                                     <div class="check-circle w-8 h-8 rounded-full border-4 border-slate-300 bg-white flex items-center justify-center text-transparent transition-colors">
@@ -622,7 +594,6 @@
                                 </div>
                                 <span class="text-xs font-bold text-amber-500 bg-amber-50 px-3 py-1.5 rounded-xl border-2 border-amber-200">Prioritas</span>
                             </div>
-                            <!-- Misi 2 -->
                             <div onclick="completeMission(this)" class="mission-item flex items-center justify-between p-5 rounded-2xl border-4 border-slate-100 bg-slate-50 cursor-pointer hover:border-emerald-200 hover:bg-emerald-50 transition-all duration-300 group">
                                 <div class="flex items-center gap-4">
                                     <div class="check-circle w-8 h-8 rounded-full border-4 border-slate-300 bg-white flex items-center justify-center text-transparent transition-colors">
@@ -631,7 +602,6 @@
                                     <span class="font-black text-slate-700 text-lg group-hover:text-emerald-700">Balas minimal 15 komentar di postingan IG 💬</span>
                                 </div>
                             </div>
-                            <!-- Misi 3 -->
                             <div onclick="completeMission(this)" class="mission-item flex items-center justify-between p-5 rounded-2xl border-4 border-slate-100 bg-slate-50 cursor-pointer hover:border-emerald-200 hover:bg-emerald-50 transition-all duration-300 group">
                                 <div class="flex items-center gap-4">
                                     <div class="check-circle w-8 h-8 rounded-full border-4 border-slate-300 bg-white flex items-center justify-center text-transparent transition-colors">
@@ -639,16 +609,6 @@
                                     </div>
                                     <span class="font-black text-slate-700 text-lg group-hover:text-emerald-700">Sapa followers lama di Twitter lewat polling 🐦</span>
                                 </div>
-                            </div>
-                            <!-- Misi 4 -->
-                            <div onclick="completeMission(this)" class="mission-item flex items-center justify-between p-5 rounded-2xl border-4 border-slate-100 bg-slate-50 cursor-pointer hover:border-emerald-200 hover:bg-emerald-50 transition-all duration-300 group">
-                                <div class="flex items-center gap-4">
-                                    <div class="check-circle w-8 h-8 rounded-full border-4 border-slate-300 bg-white flex items-center justify-center text-transparent transition-colors">
-                                        <i data-lucide="check" class="w-5 h-5 font-black"></i>
-                                    </div>
-                                    <span class="font-black text-slate-700 text-lg group-hover:text-emerald-700">Bikin desain poster "Diskon Akhir Pekan" 🎨</span>
-                                </div>
-                                <span class="text-xs font-bold text-sky-500 bg-sky-50 px-3 py-1.5 rounded-xl border-2 border-sky-200">Menunggu Desainer</span>
                             </div>
                         </div>
                     </div>
@@ -702,15 +662,13 @@
 
             </main>
         </div>
-    </div> <!-- END WRAPPER UTAMA -->
+    </div> 
 
     <!-- FIREBASE INTEGRATION -->
     <script type="module">
-        // Import fungsi dari Firebase SDK versi CDN
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
         
-        // Konfigurasi Firebase Anda
         const firebaseConfig = {
             apiKey: "AIzaSyB8bwoIbl8qOAEz3Ig4nnBeECtKOlDNyD0",
             authDomain: "sosmed-90b2b.firebaseapp.com",
@@ -721,30 +679,35 @@
             measurementId: "G-XJZQT92VFP"
         };
 
-        // Inisialisasi Firebase & Analytics
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
-
-        // Simpan instance ke global window agar bisa diakses oleh skrip UI di bawah
         window.firebaseApp = app;
-        console.log("Firebase berhasil disambungkan! 🚀");
     </script>
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
+        // --- LOGO ASLI (SVG VEKTOR MURNI) ---
+        const svgTikTok = '<svg viewBox="0 0 448 512" class="w-full h-full"><path fill="#25F4EE" d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/><path fill="#FE2C55" d="M438,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,175,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,371,102.39a121.43,121.43,0,0,0,67,20.14Z"/><path fill="#000000" d="M443,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,180,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,376,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>';
+        const svgIG = '<svg viewBox="0 0 36 36" class="w-full h-full"><defs><linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#FFC107"/><stop offset="50%" stop-color="#F56040"/><stop offset="100%" stop-color="#833AB4"/></linearGradient></defs><rect width="36" height="36" rx="8" fill="url(#ig-grad)"/><path fill="#FFF" d="M18 8.8c-3.1 0-3.5 0-4.7.1-1.2.1-2 .3-2.5.5-.6.2-1 .5-1.5 1s-.8.9-1 1.5c-.2.5-.4 1.3-.5 2.5-.1 1.2-.1 1.6-.1 4.7s0 3.5.1 4.7c.1 1.2.3 2 .5 2.5.2.6.5 1 1 1.5s.9.8 1.5 1c.5.2 1.3.4 2.5.5 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1.2-.1 2-.3 2.5-.5.6-.2 1-.5 1.5-1s.8-.9 1-1.5c.2-.5.4-1.3.5-2.5.1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c-.1-1.2-.3-2-.5-2.5-.2-.6-.5-1-1-1.5s-.9-.8-1.5-1c-.5-.2-1.3-.4-2.5-.5-1.2-.1-1.6-.1-4.7-.1zm0 2.5c3 0 3.4 0 4.6.1 1.1.1 1.7.2 2.1.4.5.2.9.5 1.1.8.3.3.6.7.8 1.1.2.4.3 1 .4 2.1.1 1.2.1 1.5.1 4.6s0 3.4-.1 4.6c-.1 1.1-.2 1.7-.4 2.1-.2.5-.5.9-.8 1.1-.3.3-.7.6-1.1.8-.4.2-1 .3-2.1.4-1.2.1-1.5.1-4.6.1s-3.4 0-4.6-.1c-1.1-.1-1.7-.2-2.1-.4-.5-.2-.9-.5-1.1-.8-.3-.3-.6-.7-.8-1.1-.2-.4-.3-1-.4-2.1-.1-1.2-.1-1.5-.1-4.6s0-3.4.1-4.6c.1-1.1.2-1.7.4-2.1.2-.5.5-.9.8-1.1.3-.3.7-.6 1.1-.8.4-.2 1-.3 2.1-.4 1.2-.1 1.5-.1 4.6-.1zm0 4.5a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 0 0 0-12.4zm0 10a3.8 3.8 0 1 1 0-7.6 3.8 3.8 0 0 1 0 7.6zm6.5-11.4a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0z"/></svg>';
+        const svgTwitter = '<svg viewBox="0 0 24 24" class="w-full h-full"><path fill="#000000" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
+        const svgWA = '<svg viewBox="0 0 24 24" class="w-full h-full"><path fill="#25D366" d="M12.01 2.01c-5.5 0-9.98 4.48-9.98 9.98 0 1.95.55 3.77 1.5 5.34l-1.5 5.48 5.6-1.47c1.54.85 3.32 1.34 5.2 1.34 5.5 0 9.98-4.48 9.98-9.98s-4.48-9.98-9.98-9.98z"/><path fill="#FFF" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.06 2.88 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35z"/></svg>';
+        const svgFB = '<svg viewBox="0 0 36 36" class="w-full h-full"><path fill="#1877F2" d="M18 0C8.06 0 0 8.06 0 18c0 8.95 6.53 16.38 15.19 17.81V23.2h-4.57v-5.2h4.57v-3.97c0-4.51 2.69-7 6.78-7 1.97 0 4.04.35 4.04.35v4.44h-2.28c-2.24 0-2.94 1.39-2.94 2.82v3.36h5.06l-.81 5.2h-4.25v12.61C29.47 34.38 36 26.95 36 18c0-9.94-8.06-18-18-18z"/><path fill="#FFF" d="M24.23 23.2l.81-5.2h-5.06v-3.36c0-1.43.7-2.82 2.94-2.82h2.28V7.38s-2.07-.35-4.04-.35c-4.09 0-6.78 2.49-6.78 7v3.97h-4.57v5.2h4.57v12.61A18.06 18.06 0 0 0 18 36a17.9 17.9 0 0 0 2.81-.22V23.2h3.42z"/></svg>';
+        const svgYT = '<svg viewBox="0 0 24 24" class="w-full h-full"><path fill="#FF0000" d="M23.5 6.19c-.24-1.3-1.28-2.35-2.58-2.61C18.64 3 12 3 12 3s-6.64 0-8.92.58A3.68 3.68 0 0 0 .5 6.19C0 8.44 0 12 0 12s0 3.56.5 5.81c.24 1.3 1.28 2.35 2.58 2.61C5.36 21 12 21 12 21s6.64 0 8.92-.58a3.68 3.68 0 0 0 2.58-2.61C24 15.56 24 12 24 12s0-3.56-.5-5.81z"/><path fill="#FFF" d="M9.54 15.57V8.43L15.82 12l-6.28 3.57z"/></svg>';
+        const svgLI = '<svg viewBox="0 0 24 24" class="w-full h-full"><rect width="24" height="24" rx="4" fill="#0A66C2"/><path fill="#FFF" d="M7.1 20.5H3.6V9H7.1v11.5zM5.3 7.4c-1.1 0-2.1-.9-2.1-2.1 0-1.1.9-2.1 2.1-2.1 1.1 0 2.1.9 2.1 2.1 0 1.1-.9 2.1-2.1 2.1zm15.1 13.1h-3.6v-5.6c0-1.3 0-3-1.9-3-1.9 0-2.1 1.4-2.1 2.9v5.7H9.3V9h3.4v1.6h.1c.5-.9 1.6-1.9 3.4-1.9 3.6 0 4.3 2.4 4.3 5.5v6.3z"/></svg>';
+
         // --- DATA MULTI-AKUN (MAX 3 AKUN PER PLATFORM) ---
         const platformsData = {
-            'tt': { id: 'tt', name: 'TikTok', icon: 'video', colorText: 'text-slate-800', colorBorder: 'border-slate-800', bg: 'bg-slate-100', 
+            'tt': { id: 'tt', name: 'TikTok', logo: svgTikTok, bg: 'bg-white', colorBorder: 'border-slate-800',
                     accounts: [{ id: 'tt_1', handle: '@perusahaan_tiktok' }] },
-            'ig': { id: 'ig', name: 'Instagram', icon: 'instagram', colorText: 'text-pink-500', colorBorder: 'border-pink-300', bg: 'bg-pink-100', 
+            'ig': { id: 'ig', name: 'Instagram', logo: svgIG, bg: 'bg-white', colorBorder: 'border-pink-300',
                     accounts: [{ id: 'ig_1', handle: '@perusahaan.kita' }] },
-            'tw': { id: 'tw', name: 'Twitter / X', icon: 'twitter', colorText: 'text-sky-500', colorBorder: 'border-sky-300', bg: 'bg-sky-100', 
+            'tw': { id: 'tw', name: 'Twitter / X', logo: svgTwitter, bg: 'bg-white', colorBorder: 'border-slate-800',
                     accounts: [{ id: 'tw_1', handle: '@perusahaanKita' }] },
-            'wa': { id: 'wa', name: 'WhatsApp', icon: 'message-circle', colorText: 'text-emerald-500', colorBorder: 'border-emerald-300', bg: 'bg-emerald-100', 
+            'wa': { id: 'wa', name: 'WhatsApp', logo: svgWA, bg: 'bg-white', colorBorder: 'border-emerald-300',
                     accounts: [{ id: 'wa_1', handle: '+62 812-3456' }] },
-            'fb': { id: 'fb', name: 'Facebook', icon: 'facebook', colorText: 'text-blue-500', colorBorder: 'border-blue-300', bg: 'bg-blue-100', accounts: [] },
-            'yt': { id: 'yt', name: 'YouTube', icon: 'youtube', colorText: 'text-red-500', colorBorder: 'border-red-300', bg: 'bg-red-100', accounts: [] },
-            'li': { id: 'li', name: 'LinkedIn', icon: 'linkedin', colorText: 'text-indigo-500', colorBorder: 'border-indigo-300', bg: 'bg-indigo-100', accounts: [] },
+            'fb': { id: 'fb', name: 'Facebook', logo: svgFB, bg: 'bg-white', colorBorder: 'border-blue-300', accounts: [] },
+            'yt': { id: 'yt', name: 'YouTube', logo: svgYT, bg: 'bg-white', colorBorder: 'border-red-300', accounts: [] },
+            'li': { id: 'li', name: 'LinkedIn', logo: svgLI, bg: 'bg-white', colorBorder: 'border-indigo-300', accounts: [] },
         };
 
         const mockFeed = [
@@ -772,6 +735,11 @@
             renderComposePlatforms();
             renderFeed();
             renderAnalytics();
+            
+            // Render logo untuk halaman target/misi secara manual
+            document.getElementById('rapor-ig').innerHTML = svgIG;
+            document.getElementById('rapor-tt').innerHTML = svgTikTok;
+            
             populateEmojis();
             lucide.createIcons();
             setupEventListeners();
@@ -781,16 +749,13 @@
         window.completeMission = function(element) {
             if(element.classList.contains('mission-done')) return;
             
-            // Tambah style terselesaikan
             element.classList.add('mission-done', 'opacity-60', 'scale-[0.98]');
             element.classList.remove('hover:scale-[1.02]');
             
-            // Ganti centang jadi hijau
             const circle = element.querySelector('.check-circle');
             circle.classList.remove('text-transparent', 'border-slate-300');
             circle.classList.add('text-white', 'border-emerald-400', 'bg-emerald-400');
             
-            // Coret teks
             const textEl = element.querySelector('span.font-black.text-slate-700');
             textEl.classList.add('line-through', 'text-slate-400');
             
@@ -1015,7 +980,7 @@
             }, 500);
         }
 
-        // --- RENDER FUNCTIONS MENDUKUNG MULTI-AKUN ---
+        // --- RENDER FUNCTIONS MENDUKUNG MULTI-AKUN & LOGO ASLI ---
         function renderDashboardAccounts() {
             const container = document.getElementById('dashboard-accounts-grid');
             let html = '';
@@ -1055,9 +1020,9 @@
                 accountsHtml = `<div class="mt-3 space-y-2 w-full">`;
                 p.accounts.forEach(acc => {
                     accountsHtml += `
-                        <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-2xl border-2 border-slate-100">
+                        <div class="flex items-center justify-between bg-white p-2.5 rounded-2xl border-2 border-slate-100 shadow-sm">
                             <span class="text-sm font-bold text-slate-700 line-clamp-1">${acc.handle}</span>
-                            <button onclick="disconnectAccount('${p.id}', '${acc.id}')" id="btn-disconnect-${acc.id}" class="p-2 bg-rose-100 text-rose-600 hover:bg-rose-500 hover:text-white rounded-xl transition-all" title="Putusin">
+                            <button onclick="disconnectAccount('${p.id}', '${acc.id}')" id="btn-disconnect-${acc.id}" class="p-2 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl transition-all" title="Putusin">
                                 <i data-lucide="unplug" class="w-4 h-4"></i>
                             </button>
                         </div>
@@ -1073,8 +1038,8 @@
             return `
                 <div class="flex flex-col p-6 rounded-3xl border-4 border-slate-100 bg-white shadow-sm hover-bounce h-full min-h-[200px]">
                     <div class="flex items-center gap-4 w-full">
-                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center ${p.bg} border-2 border-white shadow-md transform -rotate-3 flex-shrink-0">
-                            <i data-lucide="${p.icon}" class="w-7 h-7 ${p.colorText}"></i>
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center bg-white border-2 border-slate-100 shadow-md transform -rotate-3 flex-shrink-0 overflow-hidden p-2.5">
+                            <div class="w-full h-full flex items-center justify-center">${p.logo}</div>
                         </div>
                         <div class="flex-1">
                             <h3 class="font-black text-slate-800 text-lg">${p.name}</h3>
@@ -1096,18 +1061,18 @@
             Object.values(platformsData).forEach(p => {
                 p.accounts.forEach(acc => {
                     const isSelected = selectedPlatformsForPost.includes(acc.id);
-                    const borderClass = isSelected ? `${p.colorBorder} bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.05)] scale-105` : 'border-slate-200 bg-slate-50 text-slate-400 hover:bg-slate-100';
-                    const iconClass = isSelected ? p.colorText : 'text-slate-400';
+                    const borderClass = isSelected ? `border-amber-300 bg-white shadow-[4px_4px_0px_0px_rgba(251,191,36,0.2)] scale-[1.02]` : 'border-slate-200 bg-slate-50 text-slate-400 hover:bg-slate-100';
+                    const iconStateClass = isSelected ? 'color-icon' : 'grayscale-icon';
                     const textClass = isSelected ? 'text-slate-800 font-black' : 'font-extrabold text-slate-500';
 
                     html += `
                         <button onclick="togglePlatformSelect('${acc.id}')" class="flex items-center gap-3 px-5 py-2.5 rounded-2xl border-4 transition-all duration-200 ${borderClass} text-left">
-                            <i data-lucide="${p.icon}" class="w-6 h-6 flex-shrink-0 ${iconClass}"></i>
-                            <div class="leading-tight">
+                            <div class="w-6 h-6 flex-shrink-0 flex items-center justify-center ${iconStateClass}">${p.logo}</div>
+                            <div class="leading-tight pr-2">
                                 <span class="block text-sm ${textClass}">${p.name}</span>
                                 <span class="block text-xs font-bold opacity-70 truncate max-w-[120px]">${acc.handle}</span>
                             </div>
-                            ${isSelected ? `<i data-lucide="check-circle-2" class="w-5 h-5 ${p.colorText} ml-1"></i>` : ''}
+                            ${isSelected ? `<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-500 ml-auto"></i>` : ''}
                         </button>
                     `;
                 });
@@ -1142,8 +1107,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="${platform.bg} p-3 rounded-2xl flex-shrink-0 border-2 border-white shadow-sm transform -rotate-6">
-                                <i data-lucide="${platform.icon}" class="w-6 h-6 ${platform.colorText}"></i>
+                            <div class="bg-white p-2.5 rounded-2xl flex-shrink-0 border-2 border-slate-100 shadow-sm transform -rotate-6">
+                                <div class="w-6 h-6 flex items-center justify-center">${platform.logo}</div>
                             </div>
                         </div>
                     </div>
@@ -1174,9 +1139,9 @@
             barContainer.innerHTML = barHtml;
 
             const sources = [
-                { name: 'Instagram', percent: 45, color: 'bg-pink-400', icon: 'instagram' },
-                { name: 'TikTok', percent: 35, color: 'bg-slate-800', icon: 'video' },
-                { name: 'Twitter / X', percent: 12, color: 'bg-sky-400', icon: 'twitter' },
+                { name: 'Instagram', percent: 45, color: 'bg-pink-400', logo: svgIG },
+                { name: 'TikTok', percent: 35, color: 'bg-slate-800', logo: svgTikTok },
+                { name: 'Twitter / X', percent: 12, color: 'bg-sky-400', logo: svgTwitter },
             ];
             const sourceContainer = document.getElementById('source-breakdown-container');
             let sourceHtml = '';
@@ -1185,6 +1150,7 @@
                     <div class="group">
                         <div class="flex justify-between items-center mb-3">
                             <div class="flex items-center gap-3">
+                                <div class="w-6 h-6 flex items-center justify-center">${s.logo}</div>
                                 <span class="font-black text-slate-700 text-lg">${s.name}</span>
                             </div>
                             <span class="text-base font-black text-slate-800 bg-slate-100 px-3 py-1 rounded-xl border-2 border-slate-200">${s.percent}%</span>
@@ -1283,13 +1249,9 @@
             document.getElementById('modal-platform-name').innerText = p.name;
             document.getElementById('modal-input-handle').value = '';
             
-            const iconContainer = document.getElementById('modal-icon-container');
-            iconContainer.className = `w-24 h-24 rounded-[2rem] flex items-center justify-center border-4 border-white shadow-xl mb-6 transform -rotate-6 ${p.bg}`;
-            
+            // Masukkan Logo Asli di Modal
             const iconEl = document.getElementById('modal-icon');
-            iconEl.setAttribute('data-lucide', p.icon);
-            iconEl.className = `w-12 h-12 ${p.colorText}`;
-            lucide.createIcons();
+            iconEl.innerHTML = p.logo;
 
             const modalContainer = document.getElementById('connect-modal-container');
             const modalBox = document.getElementById('connect-modal');
@@ -1398,7 +1360,7 @@
                         <img src="https://ui-avatars.com/api/?name=Andi+S&background=fecdd3&color=be123c&rounded=true" class="w-14 h-14 shadow-sm border-2 border-white group-hover:rotate-6 transition-transform">
                         <div class="flex-1">
                             <h4 class="font-black text-slate-800 text-lg">Andi Saputra</h4>
-                            <p class="text-sm font-bold text-slate-500">Dari TikTok • 10 mnt lalu</p>
+                            <p class="text-sm font-bold text-slate-500 flex items-center gap-1">Dari <span class="w-4 h-4 inline-flex">${svgTikTok}</span> TikTok • 10 mnt lalu</p>
                         </div>
                         <button class="text-rose-500 bg-rose-50 hover:bg-rose-100 p-3 rounded-2xl transition-colors"><i data-lucide="user-plus" class="w-5 h-5"></i></button>
                     </div>
@@ -1435,7 +1397,7 @@
                             <h4 class="font-black text-slate-800 text-lg">Promo Flash Sale 🔥</h4>
                             <p class="text-base font-bold text-slate-500 mb-3">Hari ini, 19:00 WIB</p>
                             <div class="flex gap-2">
-                                <span class="bg-pink-50 text-pink-600 px-3 py-1.5 rounded-xl text-sm font-bold border-2 border-pink-200 flex items-center gap-1"><i data-lucide="instagram" class="w-4 h-4"></i> IG</span>
+                                <span class="bg-pink-50 text-pink-600 px-3 py-1.5 rounded-xl text-sm font-bold border-2 border-pink-200 flex items-center gap-1"><span class="w-4 h-4">${svgIG}</span> IG</span>
                             </div>
                         </div>
                     </div>
@@ -1451,7 +1413,7 @@
                     <div class="space-y-4">
                         <div class="p-5 bg-emerald-50 rounded-3xl border-4 border-emerald-200 cursor-pointer hover:bg-emerald-100 hover:scale-[1.02] transition-all">
                             <div class="flex justify-between items-center mb-2">
-                                <h4 class="font-black text-slate-800 flex items-center gap-2 text-lg"><i data-lucide="video" class="w-5 h-5 text-slate-700"></i> Sisca Soewit</h4>
+                                <h4 class="font-black text-slate-800 flex items-center gap-2 text-lg"><span class="w-5 h-5 flex items-center">${svgWA}</span> Sisca Soewit</h4>
                                 <span class="text-xs font-black text-emerald-600 bg-white px-3 py-1 rounded-xl shadow-sm border-2 border-emerald-100">Baru aja</span>
                             </div>
                             <p class="text-base font-bold text-emerald-800 line-clamp-2">"Min, dress yang warna merah ukuran L masih restock nggak ya? Mau checkout nih!"</p>
