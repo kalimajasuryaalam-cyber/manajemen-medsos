@@ -704,6 +704,32 @@
         </div>
     </div> <!-- END WRAPPER UTAMA -->
 
+    <!-- FIREBASE INTEGRATION -->
+    <script type="module">
+        // Import fungsi dari Firebase SDK versi CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+        
+        // Konfigurasi Firebase Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyB8bwoIbl8qOAEz3Ig4nnBeECtKOlDNyD0",
+            authDomain: "sosmed-90b2b.firebaseapp.com",
+            projectId: "sosmed-90b2b",
+            storageBucket: "sosmed-90b2b.firebasestorage.app",
+            messagingSenderId: "727299970521",
+            appId: "1:727299970521:web:d94bb2085f141ee97275c8",
+            measurementId: "G-XJZQT92VFP"
+        };
+
+        // Inisialisasi Firebase & Analytics
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        // Simpan instance ke global window agar bisa diakses oleh skrip UI di bawah
+        window.firebaseApp = app;
+        console.log("Firebase berhasil disambungkan! 🚀");
+    </script>
+
     <!-- JAVASCRIPT LOGIC -->
     <script>
         // --- DATA MULTI-AKUN (MAX 3 AKUN PER PLATFORM) ---
