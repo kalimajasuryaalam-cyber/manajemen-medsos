@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medsos Center Dashboard</title>
+    
+    <!-- Google Fonts: Nunito (Bulat, Ramah, dan Ceria) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Nunito"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        /* Custom Scrollbar Ceria */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #fca5a5; border-radius: 20px; border: 2px solid #fff9f0; }
+        ::-webkit-scrollbar-thumb:hover { background: #f87171; }
+        
+        /* Animasi Bouncy (Memantul) */
+        .toast-enter { animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
+        .toast-exit { animation: bounceOut 0.4s ease-in forwards; }
+        
+        .modal-enter { animation: bounceInModal 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
+        .modal-exit { animation: bounceOutModal 0.3s ease-in forwards; }
+        
+        @keyframes bounceIn {
+            0% { transform: translateY(-30px) scale(0.8); opacity: 0; }
+            70% { transform: translateY(10px) scale(1.05); opacity: 1; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        @keyframes bounceOut {
+            from { transform: translateY(0) scale(1); opacity: 1; }
+            to { transform: translateY(-30px) scale(0.8); opacity: 0; }
+        }
+
+        @keyframes bounceInModal {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes bounceOutModal {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(0.8); opacity: 0; }
+        }
+
+        /* Bouncy Hover Effect untuk Kartu */
+        .hover-bounce {
+            transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55), box-shadow 0.3s ease;
+        }
+        .hover-bounce:hover {
+            transform: translateY(-8px) scale(1.02) rotate(1deg);
+            box-shadow: 0 25px 30px -5px rgba(0, 0, 0, 0.08), 0 15px 15px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Glass yang Ceria */
+        .glass-ceria {
+            background: rgba(255, 249, 240, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 4px dashed #fce7f3; /* Garis putus-putus lucu */
+        }
+        
+        /* Buat icon sedikit lebih tebal secara global */
+        .lucide { stroke-width: 2.5; }
+
+        /* Floating Animation untuk Login Background */
+        .float-slow { animation: float 6s ease-in-out infinite; }
+        .float-fast { animation: float 4s ease-in-out infinite reverse; }
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        /* Fade transition helpers */
+        .fade-hide { opacity: 0; pointer-events: none; z-index: -1; transition: opacity 0.4s ease; position: absolute; }
+        .fade-show { opacity: 1; pointer-events: auto; z-index: 100; transition: opacity 0.4s ease; position: absolute; inset: 0; }
+    </style>
+</head>
+<body class="bg-[#fff9f0] font-sans overflow-hidden text-slate-700 h-screen w-screen relative">
+
+    <!-- AUTENTIKASI WRAPPER (LOGIN & DAFTAR) -->
+    <div id="auth-container" class="absolute inset-0 z-[100] flex items-center justify-center p-6 bg-[#fff9f0] bg-[radial-gradient(#fce7f3_2px,transparent_2px)] [background-size:32px_32px] transition-opacity duration-500">
+        <!-- Ornamen Latar Belakang -->
+        <div class="absolute top-10 left-10 text-6xl float-slow opacity-60">🎈</div>
+        <div class="absolute bottom-20 right-20 text-7xl float-fast opacity-60">✨</div>
+        <div class="absolute top-32 right-32 text-5xl float-slow opacity-60">🚀</div>
+        <div class="absolute bottom-10 left-32 text-6xl float-fast opacity-60">🎉</div>
+
+        <!-- NOTIFIKASI TOAST LOGIN/REGISTER -->
+        <div id="auth-toast" class="fixed top-10 bg-white border-4 border-emerald-300 text-slate-800 px-7 py-4 rounded-3xl shadow-xl shadow-emerald-500/20 flex items-center gap-4 z-[110] hidden">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                <i data-lucide="party-popper" class="w-7 h-7 text-emerald-500"></i>
+            </div>
+            <span id="auth-toast-message" class="font-black text-lg tracking-wide text-emerald-700">Berhasil! 🎉</span>
+        </div>
+
+        <!-- VIEW: PINTU MASUK (LOGIN) -->
+        <div id="view-login" class="fade-show bg-white border-4 border-amber-100 rounded-[3rem] p-8 sm:p-10 max-w-md w-full shadow-2xl shadow-amber-100/50 flex flex-col items-center hover-bounce mx-auto my-auto self-center">
+            <div class="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-rose-400 to-orange-400 flex items-center justify-center shadow-lg shadow-rose-200 rotate-6 mb-6 border-4 border-white">
+                <i data-lucide="sparkles" class="w-10 h-10 text-white"></i>
+            </div>
+            
+            <h1 class="text-4xl font-black text-slate-800 tracking-tight text-center mb-2">Medsos<span class="text-rose-500">Yay!</span></h1>
+            <p class="text-slate-500 font-extrabold text-lg text-center mb-6">Pilih pintu masukmu hari ini! 👇</p>
+
+            <div class="w-full space-y-5">
+                <div class="flex gap-4">
+                    <div onclick="handleAdminClick('login')" id="login-role-admin" class="flex-1 p-4 rounded-3xl border-4 border-slate-100 bg-slate-50 text-slate-400 font-black text-center cursor-pointer hover-bounce shadow-sm hover:border-slate-200 transition-all">
+                        <div class="text-3xl mb-1">👑</div>
+                        Admin
+                    </div>
+                    <div onclick="selectRole('anggota', 'login')" id="login-role-anggota" class="flex-1 p-4 rounded-3xl border-4 border-sky-300 bg-sky-50 text-sky-600 font-black text-center cursor-pointer hover-bounce shadow-sm transform scale-105 transition-all">
+                        <div class="text-3xl mb-1">🎒</div>
+                        Anggota
+                    </div>
+                </div>
+
+                <form onsubmit="handleLogin(event)" class="space-y-4 w-full">
+                    <input type="text" id="login-username" placeholder="Username kamu..." required class="w-full px-5 py-4 bg-slate-50 border-4 border-slate-100 rounded-2xl focus:border-amber-300 focus:bg-white transition-all outline-none font-bold text-slate-800 text-lg text-center">
+                    <input type="password" id="login-password" placeholder="Kata Sandi Rahasia 🤫" required class="w-full px-5 py-4 bg-slate-50 border-4 border-slate-100 rounded-2xl focus:border-amber-300 focus:bg-white transition-all outline-none font-bold text-slate-800 text-lg text-center">
+                    
+                    <button type="submit" id="btn-login" class="w-full flex justify-center items-center gap-3 px-8 py-4 mt-2 rounded-2xl font-black text-white transition-all bg-emerald-400 border-b-4 border-emerald-600 hover:bg-emerald-500 active:border-b-0 active:translate-y-1 text-xl shadow-lg shadow-emerald-200">
+                        <i data-lucide="door-open" class="w-6 h-6"></i> Yuk Masuk!
+                    </button>
+                </form>
+
+                <p class="text-center font-bold text-slate-500 mt-4">
+                    Belum punya akun? <a href="#" onclick="switchAuthView('register')" class="text-rose-500 hover:text-rose-600 border-b-2 border-rose-300 hover:border-rose-500 transition-colors pb-0.5">Daftar di sini!</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- VIEW: DAFTAR (REGISTER) -->
+        <div id="view-register" class="fade-hide bg-white border-4 border-sky-100 rounded-[3rem] p-8 sm:p-10 max-w-md w-full shadow-2xl shadow-sky-100/50 flex flex-col items-center hover-bounce mx-auto my-auto self-center">
+            <div class="w-16 h-16 rounded-[1.5rem] bg-gradient-to-br from-sky-400 to-indigo-400 flex items-center justify-center shadow-lg shadow-sky-200 -rotate-6 mb-4 border-4 border-white">
+                <i data-lucide="user-plus" class="w-8 h-8 text-white"></i>
+            </div>
+            
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight text-center mb-2">Gabung Sama Kita!</h1>
+            <p class="text-slate-500 font-extrabold text-base text-center mb-6">Pilih peranmu dan isi form di bawah ini 📝</p>
+
+            <div class="w-full space-y-4">
+                <div class="flex gap-4 mb-2">
+                    <div onclick="handleAdminClick('register')" id="register-role-admin" class="flex-1 p-3 rounded-2xl border-4 border-slate-100 bg-slate-50 text-slate-400 font-black text-center cursor-pointer hover-bounce shadow-sm hover:border-slate-200 transition-all text-sm">
+                        <div class="text-2xl mb-1">👑</div>Admin
+                    </div>
+                    <div onclick="selectRole('anggota', 'register')" id="register-role-anggota" class="flex-1 p-3 rounded-2xl border-4 border-sky-300 bg-sky-50 text-sky-600 font-black text-center cursor-pointer hover-bounce shadow-sm transform scale-105 transition-all text-sm">
+                        <div class="text-2xl mb-1">🎒</div>Anggota
+                    </div>
+                </div>
+
+                <form onsubmit="handleRegister(event)" class="space-y-3 w-full">
+                    <input type="text" id="reg-name" placeholder="Nama Panggilan Lucu" required class="w-full px-5 py-3 bg-slate-50 border-4 border-slate-100 rounded-2xl focus:border-sky-300 focus:bg-white transition-all outline-none font-bold text-slate-800 text-base text-center">
+                    <input type="email" id="reg-email" placeholder="Email kamu" required class="w-full px-5 py-3 bg-slate-50 border-4 border-slate-100 rounded-2xl focus:border-sky-300 focus:bg-white transition-all outline-none font-bold text-slate-800 text-base text-center">
+                    <input type="password" id="reg-password" placeholder="Bikin Kata Sandi Rahasia" required class="w-full px-5 py-3 bg-slate-50 border-4 border-slate-100 rounded-2xl focus:border-sky-300 focus:bg-white transition-all outline-none font-bold text-slate-800 text-base text-center">
+                    
+                    <button type="submit" id="btn-register" class="w-full flex justify-center items-center gap-2 px-8 py-3.5 mt-4 rounded-2xl font-black text-white transition-all bg-sky-400 border-b-4 border-sky-600 hover:bg-sky-500 active:border-b-0 active:translate-y-1 text-lg shadow-lg shadow-sky-200">
+                        <i data-lucide="rocket" class="w-5 h-5"></i> Daftar Sekarang!
+                    </button>
+                </form>
+
+                <p class="text-center font-bold text-slate-500 mt-4">
+                    Eh, udah punya akun? <a href="#" onclick="switchAuthView('login')" class="text-sky-500 hover:text-sky-600 border-b-2 border-sky-300 hover:border-sky-500 transition-colors pb-0.5">Masuk aja!</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- WRAPPER UTAMA APLIKASI (Sembunyi sebelum login) -->
+    <div id="app-layout" class="flex h-screen w-full hidden opacity-0 transition-opacity duration-700">
+        
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 bg-white text-slate-700 transition-transform duration-300 ease-in-out transform -translate-x-full md:relative md:translate-x-0 flex flex-col border-r-[6px] border-amber-100 shadow-2xl md:shadow-none rounded-r-3xl md:rounded-none">
+            <div class="p-8 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-[1rem] bg-gradient-to-br from-rose-400 to-orange-400 flex items-center justify-center shadow-lg shadow-rose-200 rotate-6 hover:rotate-12 transition-transform">
+                        <i data-lucide="sparkles" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <span class="text-3xl font-black tracking-tight text-slate-800">Medsos<span class="text-rose-500">Yay!</span></span>
+                </div>
+                <button id="close-mobile-menu" class="md:hidden text-slate-400 hover:text-rose-500 bg-rose-50 p-2.5 rounded-full transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <nav class="flex-1 px-5 py-4 space-y-3 overflow-y-auto" id="nav-menu">
+                <button data-target="view-dashboard" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 bg-gradient-to-r from-rose-400 to-orange-400 text-white shadow-lg shadow-rose-200 font-extrabold hover:scale-105">
+                    <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+                    <span class="text-lg">Dasbor 🌟</span>
+                </button>
+                <button data-target="view-channels" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 text-slate-500 hover:bg-emerald-50 hover:text-emerald-500 font-extrabold hover:scale-105 border-2 border-transparent hover:border-emerald-200">
+                    <i data-lucide="plug-2" class="w-6 h-6"></i>
+                    <span class="text-lg">Saluran 🔌</span>
+                </button>
+                <button data-target="view-compose" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 text-slate-500 hover:bg-orange-50 hover:text-orange-500 font-extrabold hover:scale-105 border-2 border-transparent hover:border-orange-200">
+                    <i data-lucide="pen-tool" class="w-6 h-6"></i>
+                    <span class="text-lg">Buat Postingan ✍️</span>
+                </button>
+                <button data-target="view-feed" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 text-slate-500 hover:bg-sky-50 hover:text-sky-500 font-extrabold hover:scale-105 border-2 border-transparent hover:border-sky-200">
+                    <i data-lucide="inbox" class="w-6 h-6"></i>
+                    <span class="text-lg">Feed Gabungan 💬</span>
+                </button>
+                <button data-target="view-analytics" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 text-slate-500 hover:bg-purple-50 hover:text-purple-500 font-extrabold hover:scale-105 border-2 border-transparent hover:border-purple-200">
+                    <i data-lucide="pie-chart" class="w-6 h-6"></i>
+                    <span class="text-lg">Analitik 📊</span>
+                </button>
+                <!-- BARU: MENU TARGET & ARAHAN -->
+                <button data-target="view-targets" class="nav-btn w-full flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 text-slate-500 hover:bg-pink-50 hover:text-pink-500 font-extrabold hover:scale-105 border-2 border-transparent hover:border-pink-200">
+                    <i data-lucide="target" class="w-6 h-6"></i>
+                    <span class="text-lg">Target & Arahan 🎯</span>
+                </button>
+            </nav>
+
+            <div class="p-6">
+                <!-- Profil Pengguna Berubah Sesuai Login -->
+                <div class="bg-gradient-to-b from-sky-100 to-indigo-100 rounded-[2rem] p-6 border-4 border-white shadow-xl shadow-sky-100/50 text-center relative overflow-hidden group">
+                    <div class="absolute -top-6 -right-6 text-7xl opacity-20 group-hover:rotate-12 transition-transform duration-500">🎈</div>
+                    <img id="sidebar-user-avatar" src="https://ui-avatars.com/api/?name=Admin+Ceria&background=f43f5e&color=fff&rounded=true" alt="User" class="w-16 h-16 rounded-full border-4 border-white mx-auto mb-3 shadow-md group-hover:-translate-y-2 transition-transform">
+                    <p id="sidebar-user-name" class="text-xl font-black text-slate-800">Admin Ceria</p>
+                    <p id="sidebar-user-email" class="text-sm text-indigo-600 font-extrabold mb-5">admin@yay.id</p>
+                    
+                    <button data-target="view-settings" class="nav-btn w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl bg-white text-indigo-600 border-b-4 border-indigo-200 hover:bg-indigo-50 active:border-b-0 active:translate-y-1 transition-all text-base font-black">
+                        <i data-lucide="settings" class="w-5 h-5"></i>
+                        <span>Pengaturan</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MOBILE OVERLAY -->
+        <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 hidden md:hidden transition-opacity"></div>
+
+        <!-- MODAL CONNECT ACCOUNT -->
+        <div id="connect-modal-container" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-0">
+            <div id="modal-backdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-md"></div>
+            <div id="connect-modal" class="relative bg-white border-4 border-slate-100 rounded-[3rem] p-8 sm:p-10 max-w-md w-full shadow-2xl z-10 flex flex-col items-center text-center">
+                
+                <button onclick="closeModal()" class="absolute top-5 right-5 p-2 bg-slate-100 text-slate-400 hover:bg-rose-100 hover:text-rose-500 rounded-full transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+
+                <div id="modal-icon-container" class="w-24 h-24 rounded-[2rem] flex items-center justify-center border-4 border-white shadow-xl mb-6 transform -rotate-6">
+                    <i id="modal-icon" data-lucide="link" class="w-12 h-12"></i>
+                </div>
+                
+                <h2 class="text-3xl font-black text-slate-800 mb-2">Sambungin <span id="modal-platform-name">Akun</span></h2>
+                <p class="text-slate-500 font-extrabold text-base mb-8">Masukin username kamu biar kita bisa tarik data dan kirim postingan ke sana! 🚀</p>
+
+                <div class="w-full space-y-4">
+                    <div class="text-left">
+                        <label class="text-sm font-black text-slate-500 uppercase tracking-widest ml-2">Username / Handle</label>
+                        <input type="text" id="modal-input-handle" placeholder="Misal: @perusahaan_keren" class="w-full mt-2 px-6 py-4 bg-slate-50 border-4 border-slate-100 rounded-2xl focus:border-sky-300 focus:bg-white transition-all outline-none font-bold text-slate-800 text-lg text-center">
+                    </div>
+                    
+                    <button onclick="submitConnection()" id="modal-btn-connect" class="w-full flex justify-center items-center gap-3 px-8 py-4 rounded-2xl font-black text-white transition-all bg-emerald-400 border-b-4 border-emerald-600 hover:bg-emerald-500 active:border-b-0 active:translate-y-1 text-xl shadow-lg shadow-emerald-200 mt-4">
+                        <i data-lucide="plug-zap" class="w-6 h-6"></i> Gas Sambungin!
+                    </button>
+                </div>
+                
+                <input type="hidden" id="modal-platform-id">
+            </div>
+        </div>
+
+        <!-- MODAL DETAIL STATISTIK -->
+        <div id="detail-modal-container" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-0">
+            <div id="detail-modal-backdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onclick="closeDetailModal()"></div>
+            <div id="detail-modal" class="relative bg-white border-4 border-slate-100 rounded-[3rem] p-8 sm:p-10 max-w-md w-full shadow-2xl z-10 flex flex-col max-h-[85vh]">
+                
+                <button onclick="closeDetailModal()" class="absolute top-5 right-5 p-2 bg-slate-100 text-slate-400 hover:bg-rose-100 hover:text-rose-500 rounded-full transition-colors z-20">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+                
+                <div class="flex items-center gap-4 mb-8">
+                    <div id="detail-modal-icon-bg" class="w-16 h-16 rounded-2xl flex items-center justify-center border-4 border-white shadow-md transform -rotate-3">
+                        <i id="detail-modal-icon" data-lucide="info" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <h2 id="detail-modal-title" class="text-2xl font-black text-slate-800">Detail</h2>
+                        <p id="detail-modal-subtitle" class="text-slate-500 font-bold text-sm">Informasi</p>
+                    </div>
+                </div>
+                
+                <div id="detail-modal-content" class="overflow-y-auto pr-2 space-y-4 custom-scrollbar flex-1">
+                    <!-- Konten Detail -->
+                </div>
+
+                <button onclick="closeDetailModal()" class="w-full mt-6 flex justify-center items-center gap-2 px-6 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-2xl font-black transition-colors text-lg">
+                    Tutup Dulu Ah!
+                </button>
+            </div>
+        </div>
+
+        <!-- MAIN KONTEN APLIKASI -->
+        <div class="flex-1 flex flex-col overflow-hidden relative">
+            
+            <!-- TOPBAR -->
+            <header class="glass-ceria h-24 flex items-center justify-between px-6 sm:px-10 z-10 sticky top-0 flex-shrink-0">
+                <div class="flex items-center gap-4">
+                    <button id="open-mobile-menu" class="md:hidden p-3 text-rose-500 bg-rose-50 hover:bg-rose-100 rounded-2xl transition-colors border-2 border-rose-200">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                    <div class="hidden sm:flex items-center bg-white px-5 py-3.5 rounded-full border-4 border-amber-100 focus-within:border-amber-300 focus-within:ring-4 focus-within:ring-amber-100 transition-all shadow-sm">
+                        <i data-lucide="search" class="w-5 h-5 text-amber-400"></i>
+                        <input type="text" placeholder="Cari hal seru hari ini..." class="bg-transparent border-none outline-none text-base ml-3 w-72 text-slate-700 placeholder-slate-400 font-extrabold">
+                    </div>
+                </div>
+                <div class="flex items-center gap-5">
+                    <button onclick="keluarAplikasi()" class="flex items-center gap-2 px-6 py-3.5 bg-rose-50 border-b-4 border-rose-200 rounded-full text-sm font-black text-rose-600 hover:bg-rose-100 active:border-b-0 active:translate-y-1 transition-all shadow-sm">
+                        <i data-lucide="log-out" class="w-5 h-5"></i> <span class="hidden sm:inline">Keluar</span>
+                    </button>
+                    <button class="relative p-3.5 text-rose-500 bg-rose-100 hover:bg-rose-200 rounded-full hover:rotate-12 transition-all border-b-4 border-rose-300 active:border-b-0 active:translate-y-1">
+                        <i data-lucide="bell" class="w-6 h-6"></i>
+                        <span class="absolute top-2 right-2 w-3.5 h-3.5 bg-red-500 rounded-full border-2 border-white animate-pulse"></span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- MAIN SCROLLABLE AREA -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto p-6 sm:p-8 lg:p-10 relative">
+                
+                <!-- TOAST NOTIFICATION MAIN APP -->
+                <div id="toast" class="fixed top-28 right-8 bg-white border-4 border-emerald-300 text-slate-800 px-7 py-4 rounded-3xl shadow-xl shadow-emerald-500/20 flex items-center gap-4 z-[70] hidden">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                        <i data-lucide="party-popper" class="w-7 h-7 text-emerald-500"></i>
+                    </div>
+                    <span id="toast-message" class="font-black text-lg tracking-wide text-emerald-700">Berhasil, Yeay! 🎉</span>
+                </div>
+
+                <!-- VIEW: DASHBOARD -->
+                <section id="view-dashboard" class="view-section space-y-10">
+                    <div>
+                        <h1 class="text-4xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+                            <span id="welcome-text">Halo Ceria!</span> <span class="text-5xl animate-bounce" style="animation-duration: 2s;">☀️</span>
+                        </h1>
+                        <p class="text-slate-500 mt-2 text-xl font-extrabold">Semua kabar baik dari audiensmu kumpul di sini.</p>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div onclick="openDetailModal('teman')" class="cursor-pointer bg-gradient-to-br from-rose-100 to-pink-100 p-6 rounded-[2.5rem] border-4 border-white shadow-xl shadow-rose-100/50 hover-bounce flex flex-col justify-between h-52 relative overflow-hidden group">
+                            <div class="absolute -right-6 -bottom-6 text-8xl opacity-30 transition-transform group-hover:scale-110 group-hover:rotate-12">💖</div>
+                            <div class="flex justify-between items-start relative">
+                                <span class="text-rose-700 text-base font-black uppercase tracking-wider">Total Teman</span>
+                                <div class="p-3 bg-white text-rose-500 rounded-2xl shadow-sm"><i data-lucide="users" class="w-7 h-7"></i></div>
+                            </div>
+                            <div class="mt-4 flex flex-col gap-2 relative">
+                                <span class="text-5xl font-black text-slate-800 group-hover:text-rose-600 transition-colors">124.5K</span>
+                                <span class="inline-flex items-center w-max text-sm font-black text-white bg-rose-400 px-3 py-1.5 rounded-full shadow-sm"><i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>Naik 2.5%!</span>
+                            </div>
+                        </div>
+                        
+                        <div onclick="openDetailModal('interaksi')" class="cursor-pointer bg-gradient-to-br from-sky-100 to-cyan-100 p-6 rounded-[2.5rem] border-4 border-white shadow-xl shadow-sky-100/50 hover-bounce flex flex-col justify-between h-52 relative overflow-hidden group">
+                            <div class="absolute -right-4 -bottom-6 text-8xl opacity-30 transition-transform group-hover:scale-110 group-hover:rotate-12">🚀</div>
+                            <div class="flex justify-between items-start relative">
+                                <span class="text-sky-700 text-base font-black uppercase tracking-wider">Total Interaksi</span>
+                                <div class="p-3 bg-white text-sky-500 rounded-2xl shadow-sm"><i data-lucide="activity" class="w-7 h-7"></i></div>
+                            </div>
+                            <div class="mt-4 flex flex-col gap-2 relative">
+                                <span class="text-5xl font-black text-slate-800 group-hover:text-sky-600 transition-colors">8.2K</span>
+                                <span class="inline-flex items-center w-max text-sm font-black text-white bg-sky-400 px-3 py-1.5 rounded-full shadow-sm"><i data-lucide="trending-up" class="w-4 h-4 mr-1"></i>Melesat 12%!</span>
+                            </div>
+                        </div>
+
+                        <div onclick="openDetailModal('jadwal')" class="cursor-pointer bg-gradient-to-br from-amber-100 to-yellow-100 p-6 rounded-[2.5rem] border-4 border-white shadow-xl shadow-amber-100/50 hover-bounce flex flex-col justify-between h-52 relative overflow-hidden group">
+                            <div class="absolute -right-4 -bottom-6 text-8xl opacity-30 transition-transform group-hover:scale-110 group-hover:rotate-12">📅</div>
+                            <div class="flex justify-between items-start relative">
+                                <span class="text-amber-700 text-base font-black uppercase tracking-wider">Jadwal Post</span>
+                                <div class="p-3 bg-white text-amber-500 rounded-2xl shadow-sm"><i data-lucide="calendar-heart" class="w-7 h-7"></i></div>
+                            </div>
+                            <div class="mt-4 flex flex-col gap-2 relative">
+                                <span class="text-5xl font-black text-slate-800 group-hover:text-amber-600 transition-colors">12</span>
+                                <span class="inline-flex items-center w-max text-sm font-black text-amber-700 bg-white/60 px-3 py-1.5 rounded-full shadow-sm">Untuk minggu ini</span>
+                            </div>
+                        </div>
+
+                        <div onclick="openDetailModal('pesan')" class="cursor-pointer bg-gradient-to-br from-emerald-100 to-green-100 p-6 rounded-[2.5rem] border-4 border-white shadow-xl shadow-emerald-100/50 hover-bounce flex flex-col justify-between h-52 relative overflow-hidden group">
+                            <div class="absolute -right-4 -bottom-6 text-8xl opacity-30 transition-transform group-hover:scale-110 group-hover:rotate-12">💌</div>
+                            <div class="flex justify-between items-start relative">
+                                <span class="text-emerald-700 text-base font-black uppercase tracking-wider">Pesan Baru</span>
+                                <div class="p-3 bg-white text-emerald-500 rounded-2xl shadow-sm"><i data-lucide="message-circle-heart" class="w-7 h-7"></i></div>
+                            </div>
+                            <div class="mt-4 flex flex-col gap-2 relative">
+                                <span class="text-5xl font-black text-slate-800 group-hover:text-emerald-600 transition-colors">34</span>
+                                <span class="inline-flex items-center w-max text-sm font-black text-white bg-emerald-500 px-3 py-1.5 rounded-full shadow-sm">Belum dibaca nih!</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Connected Accounts Overview -->
+                    <div class="bg-white rounded-[3rem] border-4 border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden">
+                        <div class="px-8 py-6 border-b-4 border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4 bg-[#fdfbf7]">
+                            <h2 class="text-2xl font-black text-slate-800">Saluran Aktif Kamu 🔌</h2>
+                            <button onclick="switchView('view-channels')" class="text-base font-black text-sky-500 hover:text-white hover:bg-sky-500 bg-white px-6 py-3 rounded-2xl transition-all border-4 border-sky-100 hover:border-sky-500 hover:-translate-y-1 shadow-sm">
+                                Atur Semua Saluran
+                            </button>
+                        </div>
+                        <div id="dashboard-accounts-grid" class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: MANAGE CHANNELS -->
+                <section id="view-channels" class="view-section hidden space-y-10">
+                    <div>
+                        <h1 class="text-4xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+                            Gudang Saluran 🔌
+                        </h1>
+                        <p class="text-slate-500 mt-2 text-xl font-extrabold">Hubungin semua akun sosmed kamu biar gampang diaturnya.</p>
+                    </div>
+
+                    <div class="bg-white rounded-[3rem] border-4 border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden p-8 sm:p-10">
+                        <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                            <h2 class="text-2xl font-black text-slate-800 border-b-4 border-amber-200 pb-2">Semua Platform</h2>
+                            <div class="bg-amber-50 text-amber-600 px-4 py-2 rounded-xl font-bold border-2 border-amber-200 text-sm flex items-center gap-2">
+                                <i data-lucide="info" class="w-4 h-4"></i> Maksimal 3 akun per platform ya!
+                            </div>
+                        </div>
+                        
+                        <div id="channels-full-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: COMPOSE POST -->
+                <section id="view-compose" class="view-section hidden max-w-4xl mx-auto">
+                    <div class="mb-10 text-center sm:text-left">
+                        <h1 class="text-4xl font-black text-slate-800 tracking-tight">Ruang Berkreasi 🎨</h1>
+                        <p class="text-slate-500 mt-2 font-extrabold text-xl">Satu coretan, siarkan ke seluruh dunia!</p>
+                    </div>
+
+                    <div class="bg-white rounded-[3rem] border-4 border-amber-100 shadow-2xl shadow-amber-100/50 overflow-hidden relative">
+                        <div class="p-8 border-b-4 border-amber-100 bg-[#fffdf5]">
+                            <p class="text-base font-black text-amber-600 mb-5 uppercase tracking-widest">Pilih Akun Tujuan:</p>
+                            <div id="platform-selector" class="flex flex-wrap gap-4">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+
+                        <div class="p-8 relative">
+                            <textarea id="post-textarea" placeholder="Hai dunia! Tebak apa yang baru hari ini? ✨" class="w-full h-56 p-6 bg-slate-50 border-4 border-slate-100 rounded-[2rem] focus:ring-0 focus:border-amber-300 focus:bg-[#fffdf5] transition-all resize-none outline-none text-slate-700 text-xl font-bold leading-relaxed"></textarea>
+                            
+                            <div id="media-preview-container" class="mt-4 flex flex-wrap gap-4 hidden">
+                                <!-- Diisi lewat JS -->
+                            </div>
+
+                            <div id="emoji-picker" class="absolute bottom-24 right-8 bg-white border-4 border-amber-100 rounded-3xl shadow-xl shadow-amber-100/50 p-5 hidden z-20 w-[320px]">
+                                <div class="flex justify-between items-center mb-3 border-b-4 border-slate-100 pb-3">
+                                    <span class="font-black text-slate-700 text-base">Pilih Emoji Lucu</span>
+                                    <button type="button" onclick="toggleEmojiPicker()" class="text-slate-400 hover:text-rose-500 bg-slate-100 hover:bg-rose-50 p-1.5 rounded-xl transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+                                </div>
+                                <div class="grid grid-cols-5 gap-2 text-3xl max-h-48 overflow-y-auto custom-scrollbar" id="emoji-list">
+                                    <!-- Diisi lewat JS -->
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4 relative">
+                                <div class="flex gap-4 w-full sm:w-auto">
+                                    <input type="file" id="media-upload-input" accept="image/*,video/*" class="hidden" multiple>
+                                    <button type="button" onclick="document.getElementById('media-upload-input').click()" class="flex-1 sm:flex-none flex justify-center items-center gap-2 px-6 py-3.5 text-slate-600 bg-white border-4 border-slate-100 hover:bg-sky-50 hover:border-sky-200 hover:text-sky-600 rounded-2xl transition-all text-base font-black shadow-sm hover-bounce">
+                                        <i data-lucide="image-plus" class="w-5 h-5"></i> Media
+                                    </button>
+                                    <button type="button" onclick="toggleEmojiPicker()" class="flex-1 sm:flex-none flex justify-center items-center gap-2 px-6 py-3.5 text-slate-600 bg-white border-4 border-slate-100 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-600 rounded-2xl transition-all text-base font-black shadow-sm hover-bounce">
+                                        <i data-lucide="smile" class="w-5 h-5"></i> Emoji
+                                    </button>
+                                </div>
+                                <div id="char-count" class="text-base font-black text-slate-500 bg-slate-100 px-5 py-2.5 rounded-2xl border-2 border-slate-200 w-full sm:w-auto text-center">0 / 280 Karakter</div>
+                            </div>
+                        </div>
+
+                        <div class="px-8 py-6 bg-slate-50 border-t-4 border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-5">
+                            <button class="w-full sm:w-auto flex justify-center items-center gap-2 px-8 py-4 text-slate-600 bg-white border-b-4 border-slate-200 rounded-2xl active:border-b-0 active:translate-y-1 transition-all text-lg font-black hover:bg-slate-100">
+                                <i data-lucide="calendar-heart" class="w-6 h-6 text-slate-500"></i> Nanti Aja Deh
+                            </button>
+                            <button id="btn-submit-post" class="w-full sm:w-auto flex justify-center items-center gap-3 px-10 py-4 rounded-2xl font-black text-white transition-all bg-gradient-to-r from-rose-400 to-orange-400 border-b-4 border-rose-600 hover:from-rose-500 hover:to-orange-500 active:border-b-0 active:translate-y-1 text-xl shadow-lg shadow-rose-200">
+                                <span id="btn-submit-text" class="flex items-center gap-2"><i data-lucide="rocket" class="w-6 h-6"></i> Siarkan Sekarang!</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: FEED -->
+                <section id="view-feed" class="view-section hidden max-w-4xl mx-auto space-y-8">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
+                        <div>
+                            <h1 class="text-4xl font-black text-slate-800 tracking-tight">Apa Kata Mereka? 🗣️</h1>
+                            <p class="text-slate-500 mt-2 font-extrabold text-xl">Dengerin obrolan audiens di satu layar yang nyaman.</p>
+                        </div>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <select class="w-full bg-white border-4 border-slate-200 text-slate-700 font-black rounded-2xl px-5 py-3 text-base outline-none focus:border-sky-300 shadow-sm cursor-pointer hover:border-sky-200 transition-colors">
+                                <option>Semua Platform 🌈</option>
+                                <option>TikTok 🎵</option>
+                                <option>Instagram 📷</option>
+                                <option>Twitter / X 🐦</option>
+                                <option>WhatsApp 💬</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="feed-container" class="space-y-6">
+                        <!-- Populated via JS -->
+                    </div>
+                </section>
+
+                <!-- VIEW: ANALYTICS -->
+                <section id="view-analytics" class="view-section hidden space-y-8">
+                    <div>
+                        <h1 class="text-4xl font-black text-slate-800 tracking-tight">Rapor Kita! 📈</h1>
+                        <p class="text-slate-500 mt-2 font-extrabold text-xl">Lihat seberapa populer kamu minggu ini. Keep it up!</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-white p-8 rounded-[3rem] border-4 border-indigo-50 shadow-xl shadow-indigo-100/50">
+                            <div class="flex justify-between items-center mb-10">
+                                <h3 class="font-black text-slate-800 text-2xl">Follower Baru</h3>
+                                <span class="px-4 py-2 bg-indigo-100 text-indigo-600 rounded-xl text-sm font-black border-2 border-indigo-200">Minggu Ini</span>
+                            </div>
+                            <div class="h-64 flex items-end justify-between gap-3" id="bar-chart-container">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-8 rounded-[3rem] border-4 border-orange-50 shadow-xl shadow-orange-100/50">
+                            <h3 class="font-black text-slate-800 text-2xl mb-8">Sumber Keramaian</h3>
+                            <div class="space-y-7" id="source-breakdown-container">
+                                <!-- Populated via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- BARU: VIEW TARGET & ARAHAN (MISI) -->
+                <section id="view-targets" class="view-section hidden space-y-10 max-w-5xl mx-auto">
+                    <div>
+                        <h1 class="text-4xl font-black text-slate-800 tracking-tight">Rapor & Misi Kita! 🎯</h1>
+                        <p class="text-slate-500 mt-2 font-extrabold text-xl">Cek nilaimu dan lakuin misi ini biar akun makin ramai & viral!</p>
+                    </div>
+
+                    <!-- Kartu Penilaian (Nilai Platform) -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Score 1 -->
+                        <div class="bg-white rounded-[2.5rem] border-4 border-slate-100 shadow-xl shadow-slate-100/50 p-6 flex flex-col relative overflow-hidden group hover-bounce">
+                            <div class="absolute -right-4 -bottom-4 text-7xl opacity-10 group-hover:rotate-12 transition-transform">📷</div>
+                            <div class="flex justify-between items-start mb-4 relative">
+                                <div class="flex items-center gap-2">
+                                    <div class="p-2 bg-pink-100 text-pink-500 rounded-xl"><i data-lucide="instagram" class="w-5 h-5"></i></div>
+                                    <span class="font-black text-slate-700 text-lg">Instagram</span>
+                                </div>
+                                <span class="text-4xl font-black text-emerald-500 drop-shadow-sm">A</span>
+                            </div>
+                            <p class="text-sm font-bold text-slate-500 relative flex-1">Wow, engagement meledak parah! Tapi hati-hati audiens mulai bosan dengan foto diam.</p>
+                            <div class="mt-4 pt-3 border-t-2 border-slate-100 text-xs font-black text-pink-500 relative">
+                                💡 Saran: Perbanyak upload Reels minggu depan!
+                            </div>
+                        </div>
+
+                        <!-- Score 2 -->
+                        <div class="bg-white rounded-[2.5rem] border-4 border-slate-100 shadow-xl shadow-slate-100/50 p-6 flex flex-col relative overflow-hidden group hover-bounce">
+                            <div class="absolute -right-4 -bottom-4 text-7xl opacity-10 group-hover:rotate-12 transition-transform">🎵</div>
+                            <div class="flex justify-between items-start mb-4 relative">
+                                <div class="flex items-center gap-2">
+                                    <div class="p-2 bg-slate-100 text-slate-800 rounded-xl"><i data-lucide="video" class="w-5 h-5"></i></div>
+                                    <span class="font-black text-slate-700 text-lg">TikTok</span>
+                                </div>
+                                <span class="text-4xl font-black text-amber-500 drop-shadow-sm">B-</span>
+                            </div>
+                            <p class="text-sm font-bold text-slate-500 relative flex-1">View agak mandek akhir-akhir ini karena kontennya kepanjangan.</p>
+                            <div class="mt-4 pt-3 border-t-2 border-slate-100 text-xs font-black text-slate-600 relative">
+                                💡 Saran: Coba pakai lagu yang lagi FYP & potong durasi!
+                            </div>
+                        </div>
+
+                        <!-- Score 3 -->
+                        <div class="bg-gradient-to-br from-indigo-500 to-purple-500 rounded-[2.5rem] border-4 border-indigo-300 shadow-xl shadow-indigo-200 p-6 flex flex-col relative overflow-hidden group hover-bounce text-white">
+                            <div class="absolute -right-4 -bottom-4 text-7xl opacity-20 group-hover:rotate-12 transition-transform">🏆</div>
+                            <div class="flex justify-between items-start mb-4 relative">
+                                <span class="font-black text-indigo-100 text-lg">Rata-rata Akun</span>
+                                <span class="text-4xl font-black text-white drop-shadow-md">88</span>
+                            </div>
+                            <p class="text-sm font-bold text-indigo-100 relative flex-1">Pertumbuhan overall sangat sehat. Terus pertahankan interaksi dengan audiens!</p>
+                            <div class="mt-4 pt-3 border-t-2 border-indigo-400 text-xs font-black text-white relative">
+                                🎉 Pertumbuhan bulanan +15%
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Misi Checkbox (Arahan) -->
+                    <div class="bg-white rounded-[3rem] border-4 border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden p-8 sm:p-10">
+                        <div class="flex items-center gap-4 border-b-4 border-rose-200 pb-4 mb-6">
+                            <div class="bg-rose-100 p-3 rounded-2xl text-rose-500"><i data-lucide="list-todo" class="w-7 h-7"></i></div>
+                            <h2 class="text-3xl font-black text-slate-800">Misi Rahasia Minggu Ini 🕵️‍♀️</h2>
+                        </div>
+                        <p class="text-slate-500 font-bold mb-6">Klik kotaknya kalau misi udah kamu beresin ya. Biar makin semangat!</p>
+                        
+                        <div class="space-y-4" id="mission-list">
+                            <!-- Misi 1 -->
+                            <div onclick="completeMission(this)" class="mission-item flex items-center justify-between p-5 rounded-2xl border-4 border-slate-100 bg-slate-50 cursor-pointer hover:border-emerald-200 hover:bg-emerald-50 transition-all duration-300 group">
+                                <div class="flex items-center gap-4">
+                                    <div class="check-circle w-8 h-8 rounded-full border-4 border-slate-300 bg-white flex items-center justify-center text-transparent transition-colors">
+                                        <i data-lucide="check" class="w-5 h-5 font-black"></i>
+                                    </div>
+                                    <span class="font-black text-slate-700 text-lg group-hover:text-emerald-700">Posting 1 Video pakai Sound Viral di TikTok 🎵</span>
+                                </div>
+                                <span class="text-xs font-bold text-amber-500 bg-amber-50 px-3 py-1.5 rounded-xl border-2 border-amber-200">Prioritas</span>
+                            </div>
+                            <!-- Misi 2 -->
+                            <div onclick="completeMission(this)" class="mission-item flex items-center justify-between p-5 rounded-2xl border-4 border-slate-100 bg-slate-50 cursor-pointer hover:border-emerald-200 hover:bg-emerald-50 transition-all duration-300 group">
+                                <div class="flex items-center gap-4">
+                                    <div class="check-circle w-8 h-8 rounded-full border-4 border-slate-300 bg-white flex items-center justify-center text-transparent transition-colors">
+                                        <i data-lucide="check" class="w-5 h-5 font-black"></i>
+                                    </div>
+                                    <span class="font-black text-slate-700 text-lg group-hover:text-emerald-700">Balas minimal 15 komentar di postingan IG 💬</span>
+                                </div>
+                            </div>
+                            <!-- Misi 3 -->
+                            <div onclick="completeMission(this)" class="mission-item flex items-center justify-between p-5 rounded-2xl border-4 border-slate-100 bg-slate-50 cursor-pointer hover:border-emerald-200 hover:bg-emerald-50 transition-all duration-300 group">
+                                <div class="flex items-center gap-4">
+                                    <div class="check-circle w-8 h-8 rounded-full border-4 border-slate-300 bg-white flex items-center justify-center text-transparent transition-colors">
+                                        <i data-lucide="check" class="w-5 h-5 font-black"></i>
+                                    </div>
+                                    <span class="font-black text-slate-700 text-lg group-hover:text-emerald-700">Sapa followers lama di Twitter lewat polling 🐦</span>
+                                </div>
+                            </div>
+                            <!-- Misi 4 -->
+                            <div onclick="completeMission(this)" class="mission-item flex items-center justify-between p-5 rounded-2xl border-4 border-slate-100 bg-slate-50 cursor-pointer hover:border-emerald-200 hover:bg-emerald-50 transition-all duration-300 group">
+                                <div class="flex items-center gap-4">
+                                    <div class="check-circle w-8 h-8 rounded-full border-4 border-slate-300 bg-white flex items-center justify-center text-transparent transition-colors">
+                                        <i data-lucide="check" class="w-5 h-5 font-black"></i>
+                                    </div>
+                                    <span class="font-black text-slate-700 text-lg group-hover:text-emerald-700">Bikin desain poster "Diskon Akhir Pekan" 🎨</span>
+                                </div>
+                                <span class="text-xs font-bold text-sky-500 bg-sky-50 px-3 py-1.5 rounded-xl border-2 border-sky-200">Menunggu Desainer</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW: SETTINGS -->
+                <section id="view-settings" class="view-section hidden space-y-8 max-w-4xl mx-auto">
+                    <div>
+                        <h1 class="text-4xl font-black text-slate-800 tracking-tight">Pengaturan ⚙️</h1>
+                        <p class="text-slate-500 mt-2 font-extrabold text-xl">Atur gaya profil dan notifikasimu di sini.</p>
+                    </div>
+
+                    <div class="bg-white rounded-[3rem] border-4 border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
+                        <div class="px-10 py-10 border-b-4 border-slate-100 flex flex-col sm:flex-row items-center sm:items-start gap-8 bg-[#fdfbf7] text-center sm:text-left">
+                            <div class="relative">
+                                <img id="setting-avatar" src="https://ui-avatars.com/api/?name=Admin+Ceria&background=f43f5e&color=fff&rounded=true&size=128" alt="User" class="w-32 h-32 rounded-full border-8 border-white shadow-xl hover:rotate-12 hover:scale-105 transition-all cursor-pointer">
+                                <button class="absolute bottom-2 right-2 p-3 bg-rose-500 text-white rounded-full shadow-lg hover:bg-rose-600 hover:scale-110 transition-all cursor-pointer border-4 border-white">
+                                    <i data-lucide="camera" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                            <div class="pt-2">
+                                <h2 id="setting-name" class="text-4xl font-black text-slate-800 mb-2">Admin Ceria</h2>
+                                <p id="setting-role" class="text-rose-500 font-extrabold text-xl bg-rose-50 px-4 py-1.5 rounded-full inline-block">Bos Besar 👑</p>
+                            </div>
+                        </div>
+
+                        <div class="p-10 space-y-10">
+                            <div>
+                                <h3 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-3"><i data-lucide="smile" class="text-sky-500 w-8 h-8"></i> Info Dasar</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div class="space-y-3">
+                                        <label class="text-base font-black text-slate-500 uppercase tracking-widest">Nama Panggilan</label>
+                                        <input type="text" id="setting-input-name" value="Admin Ceria" class="w-full px-5 py-4 bg-slate-50 border-4 border-slate-100 rounded-2xl focus:border-sky-300 focus:bg-white transition-all outline-none font-bold text-slate-800 text-lg">
+                                    </div>
+                                    <div class="space-y-3">
+                                        <label class="text-base font-black text-slate-500 uppercase tracking-widest">Alamat Email</label>
+                                        <input type="email" id="setting-input-email" value="admin@yay.id" class="w-full px-5 py-4 bg-slate-50 border-4 border-slate-100 rounded-2xl focus:border-sky-300 focus:bg-white transition-all outline-none font-bold text-slate-800 text-lg">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="border-2 border-slate-100">
+
+                            <div class="flex flex-col sm:flex-row justify-end gap-4">
+                                <button class="px-8 py-4 rounded-2xl font-black text-slate-500 bg-slate-100 hover:bg-slate-200 hover:text-slate-700 transition-colors text-lg w-full sm:w-auto">Batal Aja</button>
+                                <button onclick="showToast('Asyik, Pengaturan sukses disimpan! 💾')" class="px-8 py-4 rounded-2xl font-black text-white bg-emerald-400 border-b-4 border-emerald-600 hover:bg-emerald-500 active:border-b-0 active:translate-y-1 transition-all text-lg w-full sm:w-auto shadow-lg shadow-emerald-200">Simpan Perubahan!</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div> <!-- END WRAPPER UTAMA -->
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA MULTI-AKUN (MAX 3 AKUN PER PLATFORM) ---
+        const platformsData = {
+            'tt': { id: 'tt', name: 'TikTok', icon: 'video', colorText: 'text-slate-800', colorBorder: 'border-slate-800', bg: 'bg-slate-100', 
+                    accounts: [{ id: 'tt_1', handle: '@perusahaan_tiktok' }] },
+            'ig': { id: 'ig', name: 'Instagram', icon: 'instagram', colorText: 'text-pink-500', colorBorder: 'border-pink-300', bg: 'bg-pink-100', 
+                    accounts: [{ id: 'ig_1', handle: '@perusahaan.kita' }] },
+            'tw': { id: 'tw', name: 'Twitter / X', icon: 'twitter', colorText: 'text-sky-500', colorBorder: 'border-sky-300', bg: 'bg-sky-100', 
+                    accounts: [{ id: 'tw_1', handle: '@perusahaanKita' }] },
+            'wa': { id: 'wa', name: 'WhatsApp', icon: 'message-circle', colorText: 'text-emerald-500', colorBorder: 'border-emerald-300', bg: 'bg-emerald-100', 
+                    accounts: [{ id: 'wa_1', handle: '+62 812-3456' }] },
+            'fb': { id: 'fb', name: 'Facebook', icon: 'facebook', colorText: 'text-blue-500', colorBorder: 'border-blue-300', bg: 'bg-blue-100', accounts: [] },
+            'yt': { id: 'yt', name: 'YouTube', icon: 'youtube', colorText: 'text-red-500', colorBorder: 'border-red-300', bg: 'bg-red-100', accounts: [] },
+            'li': { id: 'li', name: 'LinkedIn', icon: 'linkedin', colorText: 'text-indigo-500', colorBorder: 'border-indigo-300', bg: 'bg-indigo-100', accounts: [] },
+        };
+
+        const mockFeed = [
+            { id: 4, platform: 'tt', author: 'Siska Vlogger', handle: '@siska_vlog', content: 'Unboxing produk terbaru! Keren banget guys, wajib cek keranjang kuning! 🎬✨', likes: '4.5K', comments: 320, shares: 150, time: '2 jam yang lalu', avatar: 'https://ui-avatars.com/api/?name=Siska+Vlogger&background=fecdd3&color=be123c&rounded=true' },
+            { id: 2, platform: 'ig', author: 'Siti Aminah', handle: '@sitiaminah99', content: 'Akhirnya paket sampai juga. Terima kasih atas pengiriman yang super cepat! 📦✨', likes: 892, comments: 45, shares: 12, time: '4 jam yang lalu', avatar: 'https://ui-avatars.com/api/?name=Siti+Aminah&background=bae6fd&color=0369a1&rounded=true' },
+            { id: 6, platform: 'wa', author: 'Pelanggan VIP', handle: '+62 899-xxxx', content: 'Halo admin, pesanan saya sudah sampai dengan aman. Kualitasnya mantap!', likes: 0, comments: 1, shares: 0, time: '5 jam yang lalu', avatar: 'https://ui-avatars.com/api/?name=Pelanggan+VIP&background=a7f3d0&color=047857&rounded=true' },
+        ];
+
+        let selectedPlatformsForPost = ['tt_1', 'ig_1', 'tw_1']; 
+        let userRoleLogin = 'anggota'; 
+        let userRoleRegister = 'anggota';
+
+        // --- STATE KLIK RAHASIA ADMIN ---
+        let adminLoginClicks = 0;
+        let adminRegisterClicks = 0;
+
+        // --- STATE MEDIA & EMOJI ---
+        let selectedMediaFiles = [];
+        const emojiListArray = ['😀','😂','🤣','🥰','😍','😎','🤩','🤔','😭','😡','👍','🙏','🔥','✨','🎉','💖','💯','🚀','🎈','🙌','💡','👋','👀','💋','🍔'];
+
+        // --- INIT & RENDER ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDashboardAccounts();
+            renderChannelsView();
+            renderComposePlatforms();
+            renderFeed();
+            renderAnalytics();
+            populateEmojis();
+            lucide.createIcons();
+            setupEventListeners();
+        });
+
+        // --- LOGIK MISI (BARU) ---
+        window.completeMission = function(element) {
+            if(element.classList.contains('mission-done')) return;
+            
+            // Tambah style terselesaikan
+            element.classList.add('mission-done', 'opacity-60', 'scale-[0.98]');
+            element.classList.remove('hover:scale-[1.02]');
+            
+            // Ganti centang jadi hijau
+            const circle = element.querySelector('.check-circle');
+            circle.classList.remove('text-transparent', 'border-slate-300');
+            circle.classList.add('text-white', 'border-emerald-400', 'bg-emerald-400');
+            
+            // Coret teks
+            const textEl = element.querySelector('span.font-black.text-slate-700');
+            textEl.classList.add('line-through', 'text-slate-400');
+            
+            showToast('Asyik! Satu misi sukses diselesaikan! Teruskan! 🚀');
+        }
+
+        // --- FUNGSI EMOJI & MEDIA ---
+        function populateEmojis() {
+            const list = document.getElementById('emoji-list');
+            list.innerHTML = emojiListArray.map(emoji => 
+                `<button type="button" onclick="insertEmoji('${emoji}')" class="hover:bg-slate-100 p-2 rounded-2xl transition-colors hover-bounce cursor-pointer flex items-center justify-center">${emoji}</button>`
+            ).join('');
+        }
+
+        window.toggleEmojiPicker = function() {
+            document.getElementById('emoji-picker').classList.toggle('hidden');
+        }
+
+        window.insertEmoji = function(emoji) {
+            const textarea = document.getElementById('post-textarea');
+            textarea.value += emoji;
+            textarea.dispatchEvent(new Event('input')); 
+        }
+
+        window.removeMedia = function(id) {
+            selectedMediaFiles = selectedMediaFiles.filter(m => m.id !== id);
+            renderMediaPreviews();
+        }
+
+        function renderMediaPreviews() {
+            const container = document.getElementById('media-preview-container');
+            if (selectedMediaFiles.length === 0) {
+                container.classList.add('hidden');
+                container.innerHTML = '';
+                return;
+            }
+            container.classList.remove('hidden');
+            let html = '';
+            selectedMediaFiles.forEach(media => {
+                html += `
+                    <div class="relative group w-24 h-24 sm:w-28 sm:h-28 rounded-[1.5rem] border-4 border-slate-200 overflow-hidden shadow-sm hover-bounce cursor-pointer">
+                        <img src="${media.url}" class="w-full h-full object-cover" />
+                        <button type="button" onclick="removeMedia('${media.id}')" class="absolute top-2 right-2 bg-rose-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-rose-600 hover:scale-110 border-2 border-white">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        // --- SISTEM LOGIN & DAFTAR ---
+        window.switchAuthView = function(view) {
+            const viewLogin = document.getElementById('view-login');
+            const viewRegister = document.getElementById('view-register');
+
+            if (view === 'register') {
+                viewLogin.classList.remove('fade-show');
+                viewLogin.classList.add('fade-hide');
+                viewRegister.classList.remove('fade-hide');
+                viewRegister.classList.add('fade-show');
+            } else {
+                viewRegister.classList.remove('fade-show');
+                viewRegister.classList.add('fade-hide');
+                viewLogin.classList.remove('fade-hide');
+                viewLogin.classList.add('fade-show');
+            }
+        }
+
+        window.handleAdminClick = function(context) {
+            if (context === 'login') {
+                if (userRoleLogin === 'admin') return; 
+                adminLoginClicks++;
+                if (adminLoginClicks >= 3) {
+                    selectRole('admin', 'login');
+                    adminLoginClicks = 0;
+                }
+            } else if (context === 'register') {
+                if (userRoleRegister === 'admin') return; 
+                adminRegisterClicks++;
+                if (adminRegisterClicks >= 3) {
+                    selectRole('admin', 'register');
+                    adminRegisterClicks = 0;
+                }
+            }
+        }
+
+        window.selectRole = function(role, context) {
+            if (context === 'login') {
+                userRoleLogin = role;
+                const adminBtn = document.getElementById('login-role-admin');
+                const anggotaBtn = document.getElementById('login-role-anggota');
+
+                if(role === 'admin') {
+                    adminBtn.className = "flex-1 p-4 rounded-3xl border-4 border-rose-300 bg-rose-50 text-rose-600 font-black text-center cursor-pointer hover-bounce shadow-sm transform scale-105 transition-all";
+                    anggotaBtn.className = "flex-1 p-4 rounded-3xl border-4 border-slate-100 bg-slate-50 text-slate-400 font-black text-center cursor-pointer hover-bounce shadow-sm hover:border-slate-200 transition-all";
+                } else {
+                    anggotaBtn.className = "flex-1 p-4 rounded-3xl border-4 border-sky-300 bg-sky-50 text-sky-600 font-black text-center cursor-pointer hover-bounce shadow-sm transform scale-105 transition-all";
+                    adminBtn.className = "flex-1 p-4 rounded-3xl border-4 border-slate-100 bg-slate-50 text-slate-400 font-black text-center cursor-pointer hover-bounce shadow-sm hover:border-slate-200 transition-all";
+                    adminLoginClicks = 0; 
+                }
+            } else if (context === 'register') {
+                userRoleRegister = role;
+                const adminBtn = document.getElementById('register-role-admin');
+                const anggotaBtn = document.getElementById('register-role-anggota');
+
+                if(role === 'admin') {
+                    adminBtn.className = "flex-1 p-3 rounded-2xl border-4 border-rose-300 bg-rose-50 text-rose-600 font-black text-center cursor-pointer hover-bounce shadow-sm transform scale-105 transition-all text-sm";
+                    anggotaBtn.className = "flex-1 p-3 rounded-2xl border-4 border-slate-100 bg-slate-50 text-slate-400 font-black text-center cursor-pointer hover-bounce shadow-sm hover:border-slate-200 transition-all text-sm";
+                } else {
+                    anggotaBtn.className = "flex-1 p-3 rounded-2xl border-4 border-sky-300 bg-sky-50 text-sky-600 font-black text-center cursor-pointer hover-bounce shadow-sm transform scale-105 transition-all text-sm";
+                    adminBtn.className = "flex-1 p-3 rounded-2xl border-4 border-slate-100 bg-slate-50 text-slate-400 font-black text-center cursor-pointer hover-bounce shadow-sm hover:border-slate-200 transition-all text-sm";
+                    adminRegisterClicks = 0; 
+                }
+            }
+        }
+
+        window.handleRegister = function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-register');
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Mendaftarkan...`;
+            btn.classList.add('opacity-80', 'cursor-wait', 'scale-95');
+            lucide.createIcons();
+
+            setTimeout(() => {
+                btn.innerHTML = `<i data-lucide="rocket" class="w-5 h-5"></i> Daftar Sekarang!`;
+                btn.classList.remove('opacity-80', 'cursor-wait', 'scale-95');
+                lucide.createIcons();
+                
+                const registeredName = document.getElementById('reg-name').value;
+                document.getElementById('login-username').value = registeredName;
+                document.getElementById('login-password').value = '123456'; 
+
+                switchAuthView('login');
+                selectRole(userRoleRegister, 'login'); 
+
+                showAuthToast(`Hore! Akun ${registeredName} berhasil dibuat. Yuk masuk! 🎊`);
+            }, 1200);
+        }
+
+        window.handleLogin = function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-login');
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> Sebentar ya...`;
+            btn.classList.add('opacity-80', 'cursor-wait', 'scale-95');
+            lucide.createIcons();
+
+            setTimeout(() => {
+                const userNameInput = document.getElementById('login-username').value || (userRoleLogin === 'admin' ? "Admin Ceria" : "Anggota Tim");
+                const avatarName = userNameInput.replace(/\s+/g, '+');
+
+                const avatarUrlAdmin = `https://ui-avatars.com/api/?name=${avatarName}&background=f43f5e&color=fff&rounded=true`;
+                const avatarUrlAnggota = `https://ui-avatars.com/api/?name=${avatarName}&background=0ea5e9&color=fff&rounded=true`;
+
+                if(userRoleLogin === 'anggota') {
+                    document.getElementById('sidebar-user-name').innerText = userNameInput;
+                    document.getElementById('sidebar-user-email').innerText = "tim@yay.id";
+                    document.getElementById('sidebar-user-avatar').src = avatarUrlAnggota;
+                    
+                    document.getElementById('setting-name').innerText = userNameInput;
+                    document.getElementById('setting-role').innerHTML = "Tukang Balas Komen 💬";
+                    document.getElementById('setting-role').className = "text-sky-500 font-extrabold text-xl bg-sky-50 px-4 py-1.5 rounded-full inline-block";
+                    document.getElementById('setting-avatar').src = avatarUrlAnggota + "&size=128";
+                    document.getElementById('setting-input-name').value = userNameInput;
+                    document.getElementById('setting-input-email').value = "tim@yay.id";
+                    document.getElementById('welcome-text').innerText = "Halo Tim Hore!";
+                } else {
+                    document.getElementById('sidebar-user-name').innerText = userNameInput;
+                    document.getElementById('sidebar-user-email').innerText = "admin@yay.id";
+                    document.getElementById('sidebar-user-avatar').src = avatarUrlAdmin;
+                    
+                    document.getElementById('setting-name').innerText = userNameInput;
+                    document.getElementById('setting-role').innerHTML = "Bos Besar 👑";
+                    document.getElementById('setting-role').className = "text-rose-500 font-extrabold text-xl bg-rose-50 px-4 py-1.5 rounded-full inline-block";
+                    document.getElementById('setting-avatar').src = avatarUrlAdmin + "&size=128";
+                    document.getElementById('setting-input-name').value = userNameInput;
+                    document.getElementById('setting-input-email').value = "admin@yay.id";
+                    document.getElementById('welcome-text').innerText = "Halo Ceria!";
+                }
+
+                const authContainer = document.getElementById('auth-container');
+                const appLayout = document.getElementById('app-layout');
+
+                authContainer.style.opacity = '0';
+                setTimeout(() => {
+                    authContainer.classList.add('hidden');
+                    appLayout.classList.remove('hidden');
+                    
+                    setTimeout(() => {
+                        appLayout.style.opacity = '1';
+                        btn.innerHTML = `<i data-lucide="door-open" class="w-6 h-6"></i> Yuk Masuk!`;
+                        btn.classList.remove('opacity-80', 'cursor-wait', 'scale-95');
+                        showToast(`Yeay! Selamat datang, ${userNameInput}! 🎉`);
+                    }, 50);
+                }, 500);
+            }, 1500); 
+        }
+
+        window.keluarAplikasi = function() {
+            const authContainer = document.getElementById('auth-container');
+            const appLayout = document.getElementById('app-layout');
+
+            appLayout.style.opacity = '0';
+            setTimeout(() => {
+                appLayout.classList.add('hidden');
+                authContainer.classList.remove('hidden');
+                setTimeout(() => {
+                    authContainer.style.opacity = '1';
+                    document.getElementById('login-username').value = '';
+                    document.getElementById('login-password').value = '';
+                    document.getElementById('reg-name').value = '';
+                    document.getElementById('reg-email').value = '';
+                    document.getElementById('reg-password').value = '';
+
+                    selectRole('anggota', 'login');
+                    selectRole('anggota', 'register');
+
+                    switchView('view-dashboard'); 
+                    switchAuthView('login'); 
+                }, 50);
+            }, 500);
+        }
+
+        // --- RENDER FUNCTIONS MENDUKUNG MULTI-AKUN ---
+        function renderDashboardAccounts() {
+            const container = document.getElementById('dashboard-accounts-grid');
+            let html = '';
+            
+            Object.values(platformsData).slice(0, 3).forEach(p => {
+                html += generateAccountCard(p);
+            });
+            
+            html += `
+                <div onclick="switchView('view-channels')" class="flex flex-col items-center justify-center p-6 rounded-3xl border-4 border-dashed border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-sky-300 transition-colors cursor-pointer hover-bounce group min-h-[200px]">
+                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center bg-white border-4 border-slate-100 shadow-sm group-hover:scale-110 transition-transform">
+                        <i data-lucide="plus" class="w-6 h-6 text-slate-400 group-hover:text-sky-500"></i>
+                    </div>
+                    <h3 class="font-black text-slate-500 group-hover:text-sky-500 text-lg mt-3 text-center">Lihat Semua<br>Platform</h3>
+                </div>
+            `;
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function renderChannelsView() {
+            const container = document.getElementById('channels-full-grid');
+            let html = '';
+            Object.values(platformsData).forEach(p => {
+                html += generateAccountCard(p);
+            });
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function generateAccountCard(p) {
+            let accountsHtml = '';
+            
+            if (p.accounts.length === 0) {
+                accountsHtml = `<p class="text-sm font-bold text-rose-400 mt-1">Belum nyambung 😢</p>`;
+            } else {
+                accountsHtml = `<div class="mt-3 space-y-2 w-full">`;
+                p.accounts.forEach(acc => {
+                    accountsHtml += `
+                        <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-2xl border-2 border-slate-100">
+                            <span class="text-sm font-bold text-slate-700 line-clamp-1">${acc.handle}</span>
+                            <button onclick="disconnectAccount('${p.id}', '${acc.id}')" id="btn-disconnect-${acc.id}" class="p-2 bg-rose-100 text-rose-600 hover:bg-rose-500 hover:text-white rounded-xl transition-all" title="Putusin">
+                                <i data-lucide="unplug" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                accountsHtml += `</div>`;
+            }
+
+            const actionHtml = p.accounts.length < 3 
+                ? `<button onclick="openModal('${p.id}')" class="mt-4 w-full py-2.5 bg-amber-100 text-amber-700 hover:bg-amber-200 text-sm font-black rounded-xl transition-all border-b-4 border-amber-300 active:border-b-0 active:translate-y-1 flex items-center justify-center gap-2"><i data-lucide="plus" class="w-4 h-4"></i> Tambah Akun (${p.accounts.length}/3)</button>`
+                : `<div class="mt-4 w-full py-2.5 bg-slate-100 text-slate-400 text-sm font-black rounded-xl text-center border-2 border-slate-200">Maksimal 3 Akun Tercapai</div>`;
+            
+            return `
+                <div class="flex flex-col p-6 rounded-3xl border-4 border-slate-100 bg-white shadow-sm hover-bounce h-full min-h-[200px]">
+                    <div class="flex items-center gap-4 w-full">
+                        <div class="w-14 h-14 rounded-2xl flex items-center justify-center ${p.bg} border-2 border-white shadow-md transform -rotate-3 flex-shrink-0">
+                            <i data-lucide="${p.icon}" class="w-7 h-7 ${p.colorText}"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="font-black text-slate-800 text-lg">${p.name}</h3>
+                            ${p.accounts.length === 0 ? accountsHtml : `<span class="inline-block mt-1 bg-emerald-50 text-emerald-600 text-xs font-black px-2 py-1 rounded-lg border-2 border-emerald-100"><i data-lucide="check-circle" class="w-3 h-3 inline"></i> ${p.accounts.length} Akun</span>`}
+                        </div>
+                    </div>
+                    ${p.accounts.length > 0 ? accountsHtml : ''}
+                    <div class="mt-auto pt-2">
+                        ${actionHtml}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderComposePlatforms() {
+            const container = document.getElementById('platform-selector');
+            let html = '';
+            
+            Object.values(platformsData).forEach(p => {
+                p.accounts.forEach(acc => {
+                    const isSelected = selectedPlatformsForPost.includes(acc.id);
+                    const borderClass = isSelected ? `${p.colorBorder} bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.05)] scale-105` : 'border-slate-200 bg-slate-50 text-slate-400 hover:bg-slate-100';
+                    const iconClass = isSelected ? p.colorText : 'text-slate-400';
+                    const textClass = isSelected ? 'text-slate-800 font-black' : 'font-extrabold text-slate-500';
+
+                    html += `
+                        <button onclick="togglePlatformSelect('${acc.id}')" class="flex items-center gap-3 px-5 py-2.5 rounded-2xl border-4 transition-all duration-200 ${borderClass} text-left">
+                            <i data-lucide="${p.icon}" class="w-6 h-6 flex-shrink-0 ${iconClass}"></i>
+                            <div class="leading-tight">
+                                <span class="block text-sm ${textClass}">${p.name}</span>
+                                <span class="block text-xs font-bold opacity-70 truncate max-w-[120px]">${acc.handle}</span>
+                            </div>
+                            ${isSelected ? `<i data-lucide="check-circle-2" class="w-5 h-5 ${p.colorText} ml-1"></i>` : ''}
+                        </button>
+                    `;
+                });
+            });
+
+            if(html === '') {
+                html = `<p class="text-sm font-bold text-rose-500 bg-rose-50 px-4 py-2 rounded-xl">Waduh, belum ada akun yang nyambung! Sambungin dulu yuk di tab Saluran.</p>`;
+            }
+
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function renderFeed() {
+            const container = document.getElementById('feed-container');
+            let html = '';
+            mockFeed.forEach(post => {
+                const platform = platformsData[post.platform];
+                html += `
+                    <div class="bg-white border-4 border-slate-100 rounded-[3rem] p-8 shadow-lg shadow-slate-100 hover-bounce transition-all">
+                        <div class="flex justify-between items-start">
+                            <div class="flex gap-5">
+                                <img src="${post.avatar}" alt="Avatar" class="w-16 h-16 rounded-2xl border-4 border-white shadow-md object-cover transform rotate-3" />
+                                <div>
+                                    <div class="flex flex-wrap items-center gap-3">
+                                        <h3 class="font-black text-slate-800 text-lg">${post.author}</h3>
+                                        <span class="text-slate-500 font-extrabold text-base">${post.handle}</span>
+                                        <span class="text-rose-500 font-bold text-sm ml-2 bg-rose-50 px-3 py-1 rounded-xl border-2 border-rose-100">${post.time}</span>
+                                    </div>
+                                    <div class="mt-4 text-slate-700 font-bold text-lg leading-relaxed pr-2 sm:pr-8">
+                                        ${post.content}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="${platform.bg} p-3 rounded-2xl flex-shrink-0 border-2 border-white shadow-sm transform -rotate-6">
+                                <i data-lucide="${platform.icon}" class="w-6 h-6 ${platform.colorText}"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function renderAnalytics() {
+            const chartData = [40, 70, 45, 90, 65, 85, 100];
+            const days = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
+            const barContainer = document.getElementById('bar-chart-container');
+            let barHtml = '';
+            chartData.forEach((val, i) => {
+                const isMax = val === 100;
+                const bgClass = isMax ? 'bg-gradient-to-t from-rose-400 to-orange-400 border-4 border-white shadow-lg' : 'bg-sky-100 hover:bg-sky-300';
+                barHtml += `
+                    <div class="w-full flex flex-col items-center gap-4 group">
+                        <div class="relative w-full h-full flex items-end rounded-2xl">
+                            <div class="w-full rounded-[1rem] transition-all duration-300 ${bgClass} group-hover:-translate-y-2 group-hover:scale-105" style="height: ${val}%">
+                                ${isMax ? `<div class="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-rose-500 text-white text-sm font-black py-1.5 px-3 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md">🔥 Keren!</div>` : ''}
+                            </div>
+                        </div>
+                        <span class="text-sm font-black text-slate-400 group-hover:text-rose-500 transition-colors">${days[i]}</span>
+                    </div>
+                `;
+            });
+            barContainer.innerHTML = barHtml;
+
+            const sources = [
+                { name: 'Instagram', percent: 45, color: 'bg-pink-400', icon: 'instagram' },
+                { name: 'TikTok', percent: 35, color: 'bg-slate-800', icon: 'video' },
+                { name: 'Twitter / X', percent: 12, color: 'bg-sky-400', icon: 'twitter' },
+            ];
+            const sourceContainer = document.getElementById('source-breakdown-container');
+            let sourceHtml = '';
+            sources.forEach(s => {
+                sourceHtml += `
+                    <div class="group">
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center gap-3">
+                                <span class="font-black text-slate-700 text-lg">${s.name}</span>
+                            </div>
+                            <span class="text-base font-black text-slate-800 bg-slate-100 px-3 py-1 rounded-xl border-2 border-slate-200">${s.percent}%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-5 overflow-hidden border-2 border-slate-200/50 p-0.5">
+                            <div class="${s.color} h-full rounded-full transition-all duration-1000 ease-out shadow-sm" style="width: 0%" data-width="${s.percent}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            sourceContainer.innerHTML = sourceHtml;
+            setTimeout(() => {
+                document.querySelectorAll('#source-breakdown-container [data-width]').forEach(bar => {
+                    bar.style.width = bar.getAttribute('data-width');
+                });
+            }, 100);
+        }
+
+        // --- INTERACTIVITY LOGIC ---
+        function switchView(targetId) {
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const views = document.querySelectorAll('.view-section');
+
+            navButtons.forEach(b => {
+                b.classList.remove('bg-gradient-to-r', 'from-rose-400', 'to-orange-400', 'text-white', 'shadow-lg', 'shadow-rose-200');
+                b.classList.add('text-slate-500', 'border-transparent');
+            });
+
+            const activeBtn = document.querySelector(`.nav-btn[data-target="${targetId}"]`);
+            if(activeBtn) {
+                activeBtn.classList.add('bg-gradient-to-r', 'from-rose-400', 'to-orange-400', 'text-white', 'shadow-lg', 'shadow-rose-200');
+                activeBtn.classList.remove('text-slate-500', 'border-transparent');
+            }
+
+            views.forEach(v => {
+                v.classList.add('hidden');
+                v.style.opacity = '0';
+            });
+            
+            const targetView = document.getElementById(targetId);
+            if(targetView) {
+                targetView.classList.remove('hidden');
+                setTimeout(() => {
+                    targetView.style.transition = 'opacity 0.3s ease';
+                    targetView.style.opacity = '1';
+                }, 50);
+            }
+            closeMobileMenu();
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    switchView(btn.getAttribute('data-target'));
+                });
+            });
+
+            document.getElementById('open-mobile-menu').addEventListener('click', openMobileMenu);
+            document.getElementById('close-mobile-menu').addEventListener('click', closeMobileMenu);
+            document.getElementById('mobile-overlay').addEventListener('click', closeMobileMenu);
+
+            document.getElementById('post-textarea').addEventListener('input', (e) => {
+                const count = e.target.value.length;
+                const counterEl = document.getElementById('char-count');
+                counterEl.innerText = `${count} / 280 Karakter`;
+                if(count > 250) {
+                    counterEl.classList.add('text-rose-600', 'bg-rose-100', 'border-rose-300');
+                } else {
+                    counterEl.classList.remove('text-rose-600', 'bg-rose-100', 'border-rose-300');
+                }
+            });
+
+            document.getElementById('media-upload-input').addEventListener('change', function(e) {
+                const files = Array.from(e.target.files);
+                files.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        const id = Date.now() + Math.random().toString(36).substring(2);
+                        selectedMediaFiles.push({ id, file, url: ev.target.result });
+                        renderMediaPreviews();
+                    }
+                    reader.readAsDataURL(file);
+                });
+                this.value = ''; 
+            });
+
+            document.getElementById('btn-submit-post').addEventListener('click', handlePostSubmit);
+        }
+
+        // --- MODAL SAMBUNG & PUTUS LOGIC ---
+        function openModal(platformId) {
+            const p = platformsData[platformId];
+            if(!p || p.accounts.length >= 3) return;
+
+            document.getElementById('modal-platform-id').value = platformId;
+            document.getElementById('modal-platform-name').innerText = p.name;
+            document.getElementById('modal-input-handle').value = '';
+            
+            const iconContainer = document.getElementById('modal-icon-container');
+            iconContainer.className = `w-24 h-24 rounded-[2rem] flex items-center justify-center border-4 border-white shadow-xl mb-6 transform -rotate-6 ${p.bg}`;
+            
+            const iconEl = document.getElementById('modal-icon');
+            iconEl.setAttribute('data-lucide', p.icon);
+            iconEl.className = `w-12 h-12 ${p.colorText}`;
+            lucide.createIcons();
+
+            const modalContainer = document.getElementById('connect-modal-container');
+            const modalBox = document.getElementById('connect-modal');
+            
+            modalContainer.classList.remove('hidden');
+            modalContainer.classList.add('flex');
+            modalBox.classList.remove('modal-exit');
+            modalBox.classList.add('modal-enter');
+        }
+
+        function closeModal() {
+            const modalContainer = document.getElementById('connect-modal-container');
+            const modalBox = document.getElementById('connect-modal');
+            
+            modalBox.classList.remove('modal-enter');
+            modalBox.classList.add('modal-exit');
+            
+            setTimeout(() => {
+                modalContainer.classList.add('hidden');
+                modalContainer.classList.remove('flex');
+            }, 300);
+        }
+
+        window.submitConnection = function() {
+            const platformId = document.getElementById('modal-platform-id').value;
+            const handleInput = document.getElementById('modal-input-handle').value;
+            const btn = document.getElementById('modal-btn-connect');
+
+            if (!handleInput.trim()) {
+                alert("Jangan lupa isi username kamu ya!");
+                return;
+            }
+
+            const p = platformsData[platformId];
+            if(p.accounts.length >= 3) {
+                alert("Wah, platform ini udah kepenuhan (maksimal 3 akun).");
+                return;
+            }
+
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> Menyambungkan...`;
+            btn.classList.add('opacity-70', 'cursor-wait');
+            lucide.createIcons();
+
+            setTimeout(() => {
+                const handle = (handleInput.startsWith('@') || platformId === 'wa') ? handleInput : `@${handleInput}`;
+                const newAccountId = `${platformId}_${Date.now()}`;
+                
+                p.accounts.push({ id: newAccountId, handle: handle });
+                
+                if(!selectedPlatformsForPost.includes(newAccountId)) {
+                    selectedPlatformsForPost.push(newAccountId);
+                }
+
+                btn.innerHTML = `<i data-lucide="plug-zap" class="w-6 h-6"></i> Gas Sambungin!`;
+                btn.classList.remove('opacity-70', 'cursor-wait');
+
+                closeModal();
+                showToast(`Asyik, ${handle} berhasil nyambung ke ${p.name}! 🎊`);
+                
+                renderDashboardAccounts();
+                renderChannelsView();
+                renderComposePlatforms();
+            }, 1200);
+        }
+
+        window.disconnectAccount = function(platformId, accountId) {
+            const btn = document.getElementById(`btn-disconnect-${accountId}`);
+            if(btn) {
+                btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
+                btn.classList.add('opacity-70', 'cursor-wait');
+                lucide.createIcons();
+            }
+
+            setTimeout(() => {
+                const p = platformsData[platformId];
+                const accIndex = p.accounts.findIndex(a => a.id === accountId);
+                let handleName = '';
+                
+                if(accIndex > -1) {
+                    handleName = p.accounts[accIndex].handle;
+                    p.accounts.splice(accIndex, 1); 
+                }
+                
+                if (selectedPlatformsForPost.includes(accountId)) {
+                    selectedPlatformsForPost = selectedPlatformsForPost.filter(id => id !== accountId);
+                }
+                
+                showToast(`Yah, akun ${handleName} udah diputusin 💔`);
+                
+                renderDashboardAccounts();
+                renderChannelsView();
+                renderComposePlatforms();
+            }, 1000);
+        }
+
+        // --- DETAIL STATISTIK MODAL LOGIC ---
+        const detailMockData = {
+            'teman': {
+                title: 'Teman Baru 🎉',
+                subtitle: 'Beberapa teman yang baru aja gabung hari ini!',
+                bg: 'bg-rose-100',
+                colorText: 'text-rose-500',
+                icon: 'users',
+                html: `
+                    <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border-4 border-slate-100 hover:border-rose-200 transition-colors cursor-pointer group">
+                        <img src="https://ui-avatars.com/api/?name=Andi+S&background=fecdd3&color=be123c&rounded=true" class="w-14 h-14 shadow-sm border-2 border-white group-hover:rotate-6 transition-transform">
+                        <div class="flex-1">
+                            <h4 class="font-black text-slate-800 text-lg">Andi Saputra</h4>
+                            <p class="text-sm font-bold text-slate-500">Dari TikTok • 10 mnt lalu</p>
+                        </div>
+                        <button class="text-rose-500 bg-rose-50 hover:bg-rose-100 p-3 rounded-2xl transition-colors"><i data-lucide="user-plus" class="w-5 h-5"></i></button>
+                    </div>
+                `
+            },
+            'interaksi': {
+                title: 'Interaksi Melesat 🚀',
+                subtitle: 'Rincian keramaian di sosmedmu hari ini',
+                bg: 'bg-sky-100',
+                colorText: 'text-sky-500',
+                icon: 'activity',
+                html: `
+                    <div class="space-y-5">
+                        <div class="p-5 bg-slate-50 rounded-3xl border-4 border-slate-100 hover:border-rose-200 transition-colors">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="font-black text-slate-700 flex items-center gap-2 text-lg"><i data-lucide="heart" class="w-5 h-5 text-rose-500"></i> Disukai</span>
+                                <span class="font-black text-rose-500 text-xl">5.2K</span>
+                            </div>
+                            <div class="w-full bg-slate-200 rounded-full h-4 border-2 border-slate-300/30"><div class="bg-rose-400 h-full rounded-full" style="width: 75%"></div></div>
+                        </div>
+                    </div>
+                `
+            },
+            'jadwal': {
+                title: 'Jadwal Post 📅',
+                subtitle: 'Intip konten apa aja yang bakal meluncur',
+                bg: 'bg-amber-100',
+                colorText: 'text-amber-500',
+                icon: 'calendar-heart',
+                html: `
+                    <div class="border-l-4 border-amber-300 ml-4 pl-6 space-y-8 relative">
+                        <div class="relative group">
+                            <div class="absolute -left-[38px] top-1 w-6 h-6 bg-amber-400 rounded-full border-4 border-white shadow-sm group-hover:scale-125 transition-transform"></div>
+                            <h4 class="font-black text-slate-800 text-lg">Promo Flash Sale 🔥</h4>
+                            <p class="text-base font-bold text-slate-500 mb-3">Hari ini, 19:00 WIB</p>
+                            <div class="flex gap-2">
+                                <span class="bg-pink-50 text-pink-600 px-3 py-1.5 rounded-xl text-sm font-bold border-2 border-pink-200 flex items-center gap-1"><i data-lucide="instagram" class="w-4 h-4"></i> IG</span>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            'pesan': {
+                title: 'Pesan Baru 💌',
+                subtitle: 'Ayo balas biar pelanggan makin sayang!',
+                bg: 'bg-emerald-100',
+                colorText: 'text-emerald-500',
+                icon: 'message-circle-heart',
+                html: `
+                    <div class="space-y-4">
+                        <div class="p-5 bg-emerald-50 rounded-3xl border-4 border-emerald-200 cursor-pointer hover:bg-emerald-100 hover:scale-[1.02] transition-all">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="font-black text-slate-800 flex items-center gap-2 text-lg"><i data-lucide="video" class="w-5 h-5 text-slate-700"></i> Sisca Soewit</h4>
+                                <span class="text-xs font-black text-emerald-600 bg-white px-3 py-1 rounded-xl shadow-sm border-2 border-emerald-100">Baru aja</span>
+                            </div>
+                            <p class="text-base font-bold text-emerald-800 line-clamp-2">"Min, dress yang warna merah ukuran L masih restock nggak ya? Mau checkout nih!"</p>
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        window.openDetailModal = function(type) {
+            const data = detailMockData[type];
+            if(!data) return;
+
+            document.getElementById('detail-modal-title').innerText = data.title;
+            document.getElementById('detail-modal-subtitle').innerText = data.subtitle;
+            
+            const iconBg = document.getElementById('detail-modal-icon-bg');
+            iconBg.className = `w-16 h-16 rounded-2xl flex items-center justify-center border-4 border-white shadow-md transform -rotate-3 ${data.bg}`;
+            
+            const iconEl = document.getElementById('detail-modal-icon');
+            iconEl.setAttribute('data-lucide', data.icon);
+            iconEl.className = `w-8 h-8 ${data.colorText}`;
+            
+            document.getElementById('detail-modal-content').innerHTML = data.html;
+
+            const modalContainer = document.getElementById('detail-modal-container');
+            const modalBox = document.getElementById('detail-modal');
+            
+            modalContainer.classList.remove('hidden');
+            modalContainer.classList.add('flex');
+            modalBox.classList.remove('modal-exit');
+            modalBox.classList.add('modal-enter');
+            
+            lucide.createIcons();
+        }
+
+        window.closeDetailModal = function() {
+            const modalContainer = document.getElementById('detail-modal-container');
+            const modalBox = document.getElementById('detail-modal');
+            
+            modalBox.classList.remove('modal-enter');
+            modalBox.classList.add('modal-exit');
+            
+            setTimeout(() => {
+                modalContainer.classList.add('hidden');
+                modalContainer.classList.remove('flex');
+            }, 300);
+        }
+
+        function openMobileMenu() {
+            document.getElementById('sidebar').classList.remove('-translate-x-full');
+            document.getElementById('mobile-overlay').classList.remove('hidden');
+        }
+
+        function closeMobileMenu() {
+            document.getElementById('sidebar').classList.add('-translate-x-full');
+            document.getElementById('mobile-overlay').classList.add('hidden');
+        }
+
+        window.togglePlatformSelect = function(id) {
+            if (selectedPlatformsForPost.includes(id)) {
+                selectedPlatformsForPost = selectedPlatformsForPost.filter(pId => pId !== id);
+            } else {
+                selectedPlatformsForPost.push(id);
+            }
+            renderComposePlatforms();
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            
+            toast.classList.remove('hidden', 'toast-exit');
+            toast.classList.add('toast-enter');
+            
+            setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-exit');
+                setTimeout(() => toast.classList.add('hidden'), 400); 
+            }, 3500);
+        }
+        
+        function showAuthToast(message) {
+            const toast = document.getElementById('auth-toast');
+            document.getElementById('auth-toast-message').innerText = message;
+            
+            toast.classList.remove('hidden', 'toast-exit');
+            toast.classList.add('toast-enter');
+            
+            setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-exit');
+                setTimeout(() => toast.classList.add('hidden'), 400); 
+            }, 3500);
+        }
+
+        function handlePostSubmit() {
+            const text = document.getElementById('post-textarea').value;
+            if (!text.trim() && selectedMediaFiles.length === 0) {
+                showToast('❌ Yah, konten atau medianya masih kosong nih!');
+                return;
+            }
+            if (selectedPlatformsForPost.length === 0) {
+                showToast('⚠️ Pilih minimal satu akun dulu ya!');
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit-post');
+            const btnText = document.getElementById('btn-submit-text');
+            
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-not-allowed', 'scale-95');
+            btnText.innerHTML = `<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> Lagi Meluncur...`;
+            lucide.createIcons();
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed', 'scale-95');
+                btnText.innerHTML = `<i data-lucide="rocket" class="w-6 h-6"></i> Siarkan Sekarang!`;
+                lucide.createIcons();
+
+                document.getElementById('post-textarea').value = '';
+                document.getElementById('char-count').innerText = '0 / 280 Karakter';
+                selectedMediaFiles = [];
+                renderMediaPreviews();
+                document.getElementById('emoji-picker').classList.add('hidden');
+                
+                showToast('Asyik, Postingan udah meluncur! 🎉');
+                
+                setTimeout(() => {
+                    switchView('view-feed');
+                }, 1000);
+            }, 1800);
+        }
+    </script>
+</body>
+</html>
