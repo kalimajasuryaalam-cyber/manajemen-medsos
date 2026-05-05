@@ -86,14 +86,13 @@
         .fade-hide { opacity: 0; pointer-events: none; z-index: -1; transition: opacity 0.4s ease; position: absolute; }
         .fade-show { opacity: 1; pointer-events: auto; z-index: 100; transition: opacity 0.4s ease; position: absolute; inset: 0; }
         
-        /* Transition untuk pemilihan akun */
         .grayscale-icon { filter: grayscale(100%); opacity: 0.5; transition: all 0.3s ease; }
         .color-icon { filter: grayscale(0%); opacity: 1; transition: all 0.3s ease; }
     </style>
 </head>
 <body class="bg-[#fff9f0] font-sans overflow-hidden text-slate-700 h-screen w-screen relative">
 
-    <!-- AUTENTIKASI WRAPPER (LOGIN & DAFTAR) -->
+    <!-- AUTENTIKASI WRAPPER -->
     <div id="auth-container" class="absolute inset-0 z-[100] flex items-center justify-center p-6 bg-[#fff9f0] bg-[radial-gradient(#fce7f3_2px,transparent_2px)] [background-size:32px_32px] transition-opacity duration-500">
         <div class="absolute top-10 left-10 text-6xl float-slow opacity-60">🎈</div>
         <div class="absolute bottom-20 right-20 text-7xl float-fast opacity-60">✨</div>
@@ -222,7 +221,7 @@
             </nav>
 
             <div class="p-6">
-                <!-- Profil Pengguna Berubah Sesuai Login -->
+                <!-- Profil Pengguna -->
                 <div class="bg-gradient-to-b from-sky-100 to-indigo-100 rounded-[2rem] p-6 border-4 border-white shadow-xl shadow-sky-100/50 text-center relative overflow-hidden group">
                     <div class="absolute -top-6 -right-6 text-7xl opacity-20 group-hover:rotate-12 transition-transform duration-500">🎈</div>
                     <img id="sidebar-user-avatar" src="https://ui-avatars.com/api/?name=Admin+Ceria&background=f43f5e&color=fff&rounded=true" alt="User" class="w-16 h-16 rounded-full border-4 border-white mx-auto mb-3 shadow-md group-hover:-translate-y-2 transition-transform object-cover">
@@ -240,7 +239,7 @@
         <!-- MOBILE OVERLAY -->
         <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 hidden md:hidden transition-opacity"></div>
 
-        <!-- MODAL CONNECT ACCOUNT -->
+        <!-- MODAL CONNECT ACCOUNT (DIPERBARUI DENGAN VALIDASI) -->
         <div id="connect-modal-container" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-0">
             <div id="modal-backdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-md"></div>
             <div id="connect-modal" class="relative bg-white border-4 border-slate-100 rounded-[3rem] p-8 sm:p-10 max-w-md w-full shadow-2xl z-10 flex flex-col items-center text-center">
@@ -254,12 +253,14 @@
                 </div>
                 
                 <h2 class="text-3xl font-black text-slate-800 mb-2">Sambungin <span id="modal-platform-name">Akun</span></h2>
-                <p class="text-slate-500 font-extrabold text-base mb-8">Masukin username kamu biar kita bisa tarik data dan kirim postingan ke sana! 🚀</p>
+                <p class="text-slate-500 font-extrabold text-base mb-6">Masukin username kamu biar kita bisa tarik data dan kirim postingan ke sana! 🚀</p>
 
                 <div class="w-full space-y-4">
-                    <div class="text-left">
-                        <label class="text-sm font-black text-slate-500 uppercase tracking-widest ml-2">Username / Handle</label>
+                    <div class="text-left relative">
+                        <label class="text-sm font-black text-slate-500 uppercase tracking-widest ml-2" id="modal-input-label">Username / Handle</label>
                         <input type="text" id="modal-input-handle" placeholder="Misal: @perusahaan_keren" class="w-full mt-2 px-6 py-4 bg-slate-50 border-4 border-slate-100 rounded-2xl focus:border-sky-300 focus:bg-white transition-all outline-none font-bold text-slate-800 text-lg text-center">
+                        <!-- Peringatan Validasi -->
+                        <p id="modal-error-text" class="text-rose-500 text-sm font-bold mt-3 text-center hidden bg-rose-50 p-3 rounded-xl border-2 border-rose-200">Pesan error di sini</p>
                     </div>
                     
                     <button onclick="submitConnection()" id="modal-btn-connect" class="w-full flex justify-center items-center gap-3 px-8 py-4 rounded-2xl font-black text-white transition-all bg-emerald-400 border-b-4 border-emerald-600 hover:bg-emerald-500 active:border-b-0 active:translate-y-1 text-xl shadow-lg shadow-emerald-200 mt-4">
@@ -690,7 +691,7 @@
     <script>
         // --- LOGO ASLI (SVG VEKTOR MURNI) ---
         const svgTikTok = '<svg viewBox="0 0 448 512" class="w-full h-full"><path fill="#25F4EE" d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/><path fill="#FE2C55" d="M438,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,175,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,371,102.39a121.43,121.43,0,0,0,67,20.14Z"/><path fill="#000000" d="M443,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,180,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,376,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>';
-        const svgIG = '<svg viewBox="0 0 36 36" class="w-full h-full"><defs><linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#FFC107"/><stop offset="50%" stop-color="#F56040"/><stop offset="100%" stop-color="#833AB4"/></linearGradient></defs><rect width="36" height="36" rx="8" fill="url(#ig-grad)"/><path fill="#FFF" d="M18 8.8c-3.1 0-3.5 0-4.7.1-1.2.1-2 .3-2.5.5-.6.2-1 .5-1.5 1s-.8.9-1 1.5c-.2.5-.4 1.3-.5 2.5-.1 1.2-.1 1.6-.1 4.7s0 3.5.1 4.7c.1 1.2.3 2 .5 2.5.2.6.5 1 1 1.5s.9.8 1.5 1c.5.2 1.3.4 2.5.5 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1.2-.1 2-.3 2.5-.5.6-.2 1-.5 1.5-1s.8-.9 1-1.5c.2-.5.4-1.3.5-2.5.1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c-.1-1.2-.3-2-.5-2.5-.2-.6-.5-1-1-1.5s-.9-.8-1.5-1c-.5-.2-1.3-.4-2.5-.5-1.2-.1-1.6-.1-4.7-.1zm0 2.5c3 0 3.4 0 4.6.1 1.1.1 1.7.2 2.1.4.5.2.9.5 1.1.8.3.3.6.7.8 1.1.2.4.3 1 .4 2.1.1 1.2.1 1.5.1 4.6s0 3.4-.1 4.6c-.1 1.1-.2 1.7-.4 2.1-.2.5-.5.9-.8 1.1-.3.3-.7.6-1.1.8-.4.2-1 .3-2.1.4-1.2.1-1.5.1-4.6.1s-3.4 0-4.6-.1c-1.1-.1-1.7-.2-2.1-.4-.5-.2-.9-.5-1.1-.8-.3-.3-.6-.7-.8-1.1-.2-.4-.3-1-.4-2.1-.1-1.2-.1-1.5-.1-4.6s0-3.4.1-4.6c.1-1.1.2-1.7.4-2.1.2-.5.5-.9.8-1.1.3-.3.7-.6 1.1-.8.4-.2 1-.3 2.1-.4 1.2-.1 1.5-.1 4.6-.1zm0 4.5a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 0 0 0-12.4zm0 10a3.8 3.8 0 1 1 0-7.6 3.8 3.8 0 0 1 0 7.6zm6.5-11.4a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0z"/></svg>';
+        const svgIG = '<svg viewBox="0 0 36 36" class="w-full h-full"><defs><linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%"><stop offset="0%" stop-color="#FFC107"/><stop offset="50%" stop-color="#F56040"/><stop offset="100%" stop-color="#833AB4"/></linearGradient></defs><rect width="36" height="36" rx="8" fill="url(#ig-grad)"/><path fill="#FFF" d="M18 8.8c-3.1 0-3.5 0-4.7.1-1.2.1-2 .3-2.5.5-.6.2-1 .5-1.5 1s-.8.9-1 1.5c-.2.5-.4 1.3-.5 2.5-.1 1.2-.1 1.6-.1 4.7s0 3.5.1 4.7c.1 1.2.3 2 .5 2.5.2.6.5 1 1 1.5s.9.8 1.5 1c.5.2 1.3.4 2.5.5 1.2.1 1.6.1 4.7.1s3.5 0 4.7-.1c1.2-.1 2-.3 2.5-.5.6-.2 1-.5 1.5-1s.8-.9 1-1.5c.2-.5.4-1.3.5-2.5.1-1.2.1-1.6.1-4.7s0-3.5-.1-4.7c-.1-1.2-.3-2-.5-2.5-.2-.6-.5-1-1-1.5s-.9-.8-1.5-1c-.5-.2-1.3-.4-2.5-.5-1.2-.1-1.6-.1-4.7-.1zm0 2.5c3 0 3.4 0 4.6.1 1.1.1 1.7.2 2.1.4.5.2.9.5 1.1.8.3.3.6.7.8 1.1.2.4.3 1 .4 2.1.1 1.2.1 1.5.1 4.6s0 3.4-.1 4.6c-.1 1.1-.2 1.7-.4 2.1-.2.5-.5.9-.8 1.1-.3.3-.7.6-1.1.8-.4.2-1 .3-2.1.4-1.2.1-1.5-.1 4.6-.1s-3.4 0-4.6-.1c-1.1-.1-1.7-.2-2.1-.4-.5-.2-.9-.5-1.1-.8-.3-.3-.6-.7-.8-1.1-.2-.4-.3-1-.4-2.1-.1-1.2-.1-1.5-.1-4.6s0-3.4.1-4.6c.1-1.1.2-1.7.4-2.1.2-.5.5-.9.8-1.1.3-.3.7-.6 1.1-.8.4-.2 1-.3 2.1-.4 1.2-.1 1.5-.1 4.6-.1zm0 4.5a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 0 0 0-12.4zm0 10a3.8 3.8 0 1 1 0-7.6 3.8 3.8 0 0 1 0 7.6zm6.5-11.4a1.6 1.6 0 1 1-3.2 0 1.6 1.6 0 0 1 3.2 0z"/></svg>';
         const svgTwitter = '<svg viewBox="0 0 24 24" class="w-full h-full"><path fill="#000000" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
         const svgWA = '<svg viewBox="0 0 24 24" class="w-full h-full"><path fill="#25D366" d="M12.01 2.01c-5.5 0-9.98 4.48-9.98 9.98 0 1.95.55 3.77 1.5 5.34l-1.5 5.48 5.6-1.47c1.54.85 3.32 1.34 5.2 1.34 5.5 0 9.98-4.48 9.98-9.98s-4.48-9.98-9.98-9.98z"/><path fill="#FFF" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.26-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51-.17-.01-.37-.01-.57-.01-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.06 2.88 1.21 3.07.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35z"/></svg>';
         const svgFB = '<svg viewBox="0 0 36 36" class="w-full h-full"><path fill="#1877F2" d="M18 0C8.06 0 0 8.06 0 18c0 8.95 6.53 16.38 15.19 17.81V23.2h-4.57v-5.2h4.57v-3.97c0-4.51 2.69-7 6.78-7 1.97 0 4.04.35 4.04.35v4.44h-2.28c-2.24 0-2.94 1.39-2.94 2.82v3.36h5.06l-.81 5.2h-4.25v12.61C29.47 34.38 36 26.95 36 18c0-9.94-8.06-18-18-18z"/><path fill="#FFF" d="M24.23 23.2l.81-5.2h-5.06v-3.36c0-1.43.7-2.82 2.94-2.82h2.28V7.38s-2.07-.35-4.04-.35c-4.09 0-6.78 2.49-6.78 7v3.97h-4.57v5.2h4.57v12.61A18.06 18.06 0 0 0 18 36a17.9 17.9 0 0 0 2.81-.22V23.2h3.42z"/></svg>';
@@ -1246,11 +1247,8 @@
                     const reader = new FileReader();
                     reader.onload = function(ev) {
                         const newUrl = ev.target.result;
-                        // Ubah gambar di Pengaturan
                         document.getElementById('setting-avatar').src = newUrl;
-                        // Ubah gambar di Sidebar
                         document.getElementById('sidebar-user-avatar').src = newUrl;
-                        
                         showToast('Asyik, Foto profil berhasil diganti! 📸');
                     }
                     reader.readAsDataURL(file);
@@ -1261,7 +1259,7 @@
             document.getElementById('btn-submit-post').addEventListener('click', handlePostSubmit);
         }
 
-        // --- MODAL SAMBUNG & PUTUS LOGIC ---
+        // --- MODAL SAMBUNG & PUTUS LOGIC (DENGAN VALIDASI) ---
         function openModal(platformId) {
             const p = platformsData[platformId];
             if(!p || p.accounts.length >= 3) return;
@@ -1269,6 +1267,23 @@
             document.getElementById('modal-platform-id').value = platformId;
             document.getElementById('modal-platform-name').innerText = p.name;
             document.getElementById('modal-input-handle').value = '';
+            
+            // Sembunyikan pesan error
+            document.getElementById('modal-error-text').classList.add('hidden');
+            
+            // Ganti Placeholder Dinamis berdasarkan Platform
+            const inputHandle = document.getElementById('modal-input-handle');
+            const inputLabel = document.getElementById('modal-input-label');
+            if(platformId === 'wa') {
+                inputLabel.innerText = "Nomor Telepon / WhatsApp";
+                inputHandle.placeholder = "Misal: 081234567890";
+            } else if (platformId === 'ig' || platformId === 'tt' || platformId === 'tw') {
+                inputLabel.innerText = "Username";
+                inputHandle.placeholder = "Misal: @namakamu";
+            } else {
+                inputLabel.innerText = "ID Halaman / Saluran";
+                inputHandle.placeholder = "Misal: namahalaman_kamu";
+            }
             
             // Masukkan Logo Asli di Modal
             const iconEl = document.getElementById('modal-icon');
@@ -1298,26 +1313,85 @@
 
         window.submitConnection = function() {
             const platformId = document.getElementById('modal-platform-id').value;
-            const handleInput = document.getElementById('modal-input-handle').value;
+            const handleInput = document.getElementById('modal-input-handle').value.trim();
             const btn = document.getElementById('modal-btn-connect');
+            const errorTextEl = document.getElementById('modal-error-text');
 
-            if (!handleInput.trim()) {
-                alert("Jangan lupa isi username kamu ya!");
+            // Reset Error
+            errorTextEl.classList.add('hidden');
+
+            // --- 1. Validasi Kosong ---
+            if (!handleInput) {
+                errorTextEl.innerText = "Eh, kolomnya masih kosong! Isi dulu ya. 😉";
+                errorTextEl.classList.remove('hidden');
                 return;
             }
 
+            // --- 2. Validasi Format Spesifik Berdasarkan Platform ---
+            let isValid = true;
+            let errorMessage = "";
+
+            if (platformId === 'wa') {
+                // WA: Harus angka, boleh pakai + di depan, minimal 8, maksimal 15 digit
+                const cleanPhone = handleInput.replace(/[- ]/g, '');
+                const phoneRegex = /^\+?[0-9]{8,15}$/;
+                if (!phoneRegex.test(cleanPhone)) {
+                    isValid = false;
+                    errorMessage = "Format nomornya keliru nih. Coba masukin angka yang bener, misal: 081234567890 📱";
+                }
+            } 
+            else if (platformId === 'ig' || platformId === 'tt' || platformId === 'tw') {
+                // IG/TT/TW: Gak boleh spasi, karakter khusus selain _ atau .
+                const cleanUsername = handleInput.replace(/^@/, '');
+                const userRegex = /^[a-zA-Z0-9_.]+$/;
+                if (!userRegex.test(cleanUsername) || cleanUsername.length < 3) {
+                    isValid = false;
+                    errorMessage = "Username kayaknya salah format deh. Jangan pakai spasi atau simbol aneh ya! Contoh: @namakamu ❌";
+                }
+            }
+            else {
+                // FB, YT, LI: Minimal 3 karakter
+                if (handleInput.length < 3) {
+                    isValid = false;
+                    errorMessage = "ID atau namanya kependekan nih. Minimal 3 huruf ya! 🧐";
+                }
+            }
+
+            if (!isValid) {
+                errorTextEl.innerText = errorMessage;
+                errorTextEl.classList.remove('hidden');
+                return;
+            }
+
+            // --- 3. Cek Batas Maksimal ---
             const p = platformsData[platformId];
             if(p.accounts.length >= 3) {
-                alert("Wah, platform ini udah kepenuhan (maksimal 3 akun).");
+                errorTextEl.innerText = "Waduh, platform ini udah kepenuhan (maksimal 3 akun). 🛑";
+                errorTextEl.classList.remove('hidden');
                 return;
             }
 
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> Menyambungkan...`;
+            // --- 4. Proses Loading & Simulasi Server ---
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-6 h-6 animate-spin"></i> Mengecek ke Server...`;
             btn.classList.add('opacity-70', 'cursor-wait');
             lucide.createIcons();
 
             setTimeout(() => {
-                const handle = (handleInput.startsWith('@') || platformId === 'wa') ? handleInput : `@${handleInput}`;
+                // --- 5. Easter Egg: Simulasi "User Not Found" ---
+                // Jika user mengetik "error", kita simulasikan penolakan dari server
+                if (handleInput.toLowerCase() === 'error' || handleInput.toLowerCase() === '@error') {
+                    errorTextEl.innerText = "Error (404): Akun tidak ditemukan di database platform. Coba cek lagi ejaannya! 🤖";
+                    errorTextEl.classList.remove('hidden');
+                    
+                    // Kembalikan tombol seperti semula
+                    btn.innerHTML = `<i data-lucide="plug-zap" class="w-6 h-6"></i> Gas Sambungin!`;
+                    btn.classList.remove('opacity-70', 'cursor-wait');
+                    lucide.createIcons();
+                    return;
+                }
+
+                // --- 6. Sukses Terhubung ---
+                const handle = (handleInput.startsWith('@') || platformId === 'wa' || platformId === 'fb' || platformId === 'yt' || platformId === 'li') ? handleInput : `@${handleInput}`;
                 const newAccountId = `${platformId}_${Date.now()}`;
                 
                 p.accounts.push({ id: newAccountId, handle: handle });
@@ -1493,14 +1567,10 @@
                 return;
             }
 
-            // Update tampilan teks di Pengaturan
             document.getElementById('setting-name').innerText = newName;
-            
-            // Update tampilan teks di Sidebar
             document.getElementById('sidebar-user-name').innerText = newName;
             document.getElementById('sidebar-user-email').innerText = newEmail;
             
-            // Update teks sambutan di Dasbor menggunakan nama depan
             const namaPanggilan = newName.split(' ')[0];
             document.getElementById('welcome-text').innerText = `Halo ${namaPanggilan}!`;
 
